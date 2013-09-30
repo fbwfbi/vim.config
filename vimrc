@@ -225,6 +225,9 @@ nmap <leader>e :WMToggle<CR>
 "command-t
 "nmap <F3> :CommandT<CR>
 
+"most recently update
+map <F4> :MRU<CR>
+
 "{{ jsbeautify
 "let g:plugin_Root_direcoty = $VIM . "/vimfiles/vim-addons/jsbeautify/"
 "map <c-f> :call JsBeautify()<cr>
