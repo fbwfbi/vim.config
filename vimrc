@@ -203,7 +203,7 @@ nmap <F8> :TagbarToggle<CR>
 
 "进行Tlist的设置
 "TlistUpdate可以更新tags
-map <F3> :silent! Tlist<CR>
+map <F2> :silent! Tlist<CR>
 let Tlist_Ctags_Cmd='ctags' "因为我们放在环境变量里，所以可以直接执行
 let Tlist_Use_Right_Window=1 "让窗口显示在右边，0的话就是显示在左边
 let Tlist_Show_One_File=0 "让taglist可以同时展示多个文件的函数列表，如果想只有1个，设置为1
@@ -223,7 +223,7 @@ let g:winManagerWindowLayout='FileExplorer'
 nmap <leader>e :WMToggle<CR>
 
 "command-t
-"nmap <F3> :CommandT<CR>
+nmap <F3> :CommandT<CR>
 
 "most recently update
 map <F4> :MRU<CR>
