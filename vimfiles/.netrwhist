@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/usr/lib/systemd/system/basic.target.wants'
+let g:netrw_dirhist_2='/usr/lib/systemd/system/runlevel1.target.wants'
+let g:netrw_dirhist_3='/usr/lib/systemd/system'
+let g:netrw_dirhist_4='/opt/Service/system/httpd-2.4.1'
+let g:netrw_dirhist_5='/usr/lib/systemd/system'
+let g:netrw_dirhist_6='/usr/share/vim/vimfiles/autoload/neocomplcache'
+let g:netrw_dirhist_7='/etc/X11/xorg.conf.d'
+let g:netrw_dirhist_8='/boot/grub2'

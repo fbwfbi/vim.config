@@ -1,0 +1,13 @@
+:help snippet-syntax snipMate-syntax
+
+:call WarningMsg(tagfiles())
+
+:help <SID>
+
+:help smarttab
+
+:scriptnames
+
+:help v:bar
+
+eclim与neocomplcache冲突，主要是ftplugin里面的文件有g:EclimCompletionMethod冲突，注释之
