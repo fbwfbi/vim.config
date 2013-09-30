@@ -223,7 +223,7 @@ let g:winManagerWindowLayout='FileExplorer'
 nmap <leader>e :WMToggle<CR>
 
 "command-t
-nmap <F3> :CommandT<CR>
+"nmap <F3> :CommandT<CR>
 
 "{{ jsbeautify
 "let g:plugin_Root_direcoty = $VIM . "/vimfiles/vim-addons/jsbeautify/"
