@@ -255,8 +255,8 @@ au BufNewFile,BufRead,BufNew * match ExtraWhitespace /\s\+$/
 
 "vam start. See help file to install
 fun! SetupVAM()
-  "let l:plugins = ['Mark', 'snipMate', 'snipmate-snippets', 'vim-addon-mw-utils', 'tlib', 'vim-addon-commenting', 'neocomplcache', 'vimproc', 'SuperTab', 'vim-jsbeautify', 'vimshell', 'unite', 'Auto_Pairs', 'html5']
-  let l:plugins = ['Mark', 'snipMate', 'snipmate-snippets', 'vim-addon-mw-utils', 'tlib', 'vim-addon-commenting', 'vimproc', 'SuperTab', 'vim-jsbeautify',  'unite', 'html5', 'eclim', 'mru', 'tComment', 'surround']
+  "let l:plugins = ['vimcdoc', 'Mark', 'snipMate', 'snipmate-snippets', 'vim-addon-mw-utils', 'tlib', 'vim-addon-commenting', 'neocomplcache', 'vimproc', 'SuperTab', 'vim-jsbeautify', 'vimshell', 'unite', 'Auto_Pairs', 'html5']
+  let l:plugins = ['vimcdoc', 'Mark', 'snipMate', 'snipmate-snippets', 'vim-addon-mw-utils', 'tlib', 'vim-addon-commenting', 'vimproc', 'SuperTab', 'vim-jsbeautify',  'unite', 'html5', 'eclim', 'mru', 'tComment', 'surround']
 
   let c = get(g:, 'vim_addon_manager', {})
   let g:vim_addon_manager = c
