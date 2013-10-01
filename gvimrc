@@ -7,8 +7,12 @@ set guioptions-=b  "隐藏底部滚动条
 "set showtabline=0  "隐藏Tab栏
 
 if has("win32")
-    set guifont=Bitstream\ Vera\ Sans\ Mono:h12
-    set guifont=Bitstream\ Vera\ Sans\:h12
+    set guifont=Bitstream\ Vera\ Sans\ Mono:h14
+    "set guifont=Bitstream\ Vera\ Sans\:h14
+elseif has("gui_macvim")
+    "set guifont=Droid\ Sans\ Mono:h16
+    set guifont=Bitstream\ Vera\ Sans\ Mono:h16
+    "set guifontwide=Bitstream\ Vera\ Sans\:h12
 else
     "set guifont=Bitstream\ Vera\ Sans\ Mono\ 14
     set guifont=Droid\ Sans\ Mono\ 13
@@ -22,8 +26,13 @@ set novisualbell
 "靠，居然加了下面这一句才起作用，逆天了啊
 set vb t_vb=
 
-winpos 173 162
-set lines=38 columns=135
+if has("gui_macvim")
+    "winpos 173 162
+    set lines=30 columns=110
+else
+    winpos 173 162
+    set lines=38 columns=135
+endif
 
 "alt + number 切换tab
 function! TabPos_ActivateBuffer(num)
