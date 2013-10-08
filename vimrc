@@ -130,12 +130,13 @@ set tags=tags,./tags
 function s:autoSetCxSystemTags()
     let l:currentExt = expand("%:e")
     if (l:currentExt == "c" || l:currentExt == "cc" || l:currentExt == "cpp")
-        set tags+=~/.vim/systags
+        "set tags+=~/.vim/systags
     else
-        set tags-=~/.vim/systags
+        "set tags-=~/.vim/systags
     endif
 endfunction
 au BufNewFile,BufRead,BufNew,BufWinEnter,TabEnter * call s:autoSetCxSystemTags()
+
 "冒号前面其实不用加\
 command -nargs=0 CtagsCreate exe "silent! !ctags -R --c++-kinds=+lpx --fields=+iaS --extra=+q" . expand("%:h")
 

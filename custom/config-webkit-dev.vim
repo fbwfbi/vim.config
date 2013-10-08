@@ -12,7 +12,7 @@ let cscopeFilesList = []
 
 let s:jhbuildDependencies = []
 call add(s:jhbuildDependencies, ['glib', ['gio', 'glib', 'gmodule', 'gobject', 'gthread']])
-call add(s:jhbuildDependencies, ['gtk', ['gdk', 'gtk', 'libgail-util']])
+call add(s:jhbuildDependencies, ['gtk+', ['gdk', 'gtk', 'libgail-util']])
 call add(s:jhbuildDependencies, ['cairo', []])
 call add(s:jhbuildDependencies, ['libsoup', ['libsoup']])
 
