@@ -29,6 +29,7 @@ set vb t_vb=
 if has("gui_macvim")
     "winpos 173 162
     set lines=30 columns=110
+    set macmeta
 else
     winpos 173 162
     set lines=38 columns=135
