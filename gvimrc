@@ -42,15 +42,25 @@ function! TabPos_ActivateBuffer(num)
     exe "tabnext" s:count
 endfunction
 
-function! TabPos_Initialize()
+function! s:TabPos_Initialize()
     for i in range(1, 9)
         exe "map <M-" . i . "> :call TabPos_ActivateBuffer(" . i . ")<CR>"
+        if has("gui_macvim")
+            exe "map <D-" . i . "> :call TabPos_ActivateBuffer(" . i . ")<CR>"
+        endif
     endfor
     exe "map <M-0> :call TabPos_ActivateBuffer(10)<CR>"
 endfunction
-autocmd VimEnter * call TabPos_Initialize()
-map<A-l> :tabnext<CR>
+
+autocmd VimEnter * call s:TabPos_Initialize()
+
 map<A-h> :tabprev<CR>
+map<A-l> :tabnext<CR>
+
+if has("gui_macvim")
+    map<D-h> :tabprev<CR>
+    map<D-l> :tabnext<CR>
+endif
 
 
 if(has("win32") || has("win95") || has("win64") || has("win16"))
