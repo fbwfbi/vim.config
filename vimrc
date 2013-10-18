@@ -49,6 +49,10 @@ else
     colorscheme desert
 endif
 
+
+let g:EasyColourCustomColours = []
+
+
 "文本缩进设置
 set nosmarttab
 set tabstop=4 "一个Tab键显示为几个空格，默认为8个太长了
@@ -259,11 +263,12 @@ au BufNewFile,BufRead,BufNew * match ExtraWhitespace /\s\+$/
 
 "vam start. See help file to install
 fun! SetupVAM()
-  "let l:plugins = ['vimcdoc', 'Mark', 'snipMate', 'snipmate-snippets', 'vim-addon-mw-utils', 'tlib', 'vim-addon-commenting', 'neocomplcache', 'vimproc', 'SuperTab', 'vim-jsbeautify', 'vimshell', 'unite', 'Auto_Pairs', 'html5']
-  let l:plugins = ['vimcdoc', 'Mark', 'snipMate',
-          \ 'snipmate-snippets', 'vim-addon-mw-utils', 'tlib',
-          \ 'vim-addon-commenting', 'vimproc', 'SuperTab', 'vim-jsbeautify',
-          \ 'unite', 'html5', 'mru', 'tComment', 'surround', 'sudo']
+  let l:plugins = ['vimcdoc', 'vim-addon-mw-utils', 'tlib',
+                  \ 'vimproc', 'sudo',
+                  \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
+                  \ 'unite', 'mru',
+                  \ 'tComment', 'surround',
+                  \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify']
 
   let c = get(g:, 'vim_addon_manager', {})
   let g:vim_addon_manager = c
