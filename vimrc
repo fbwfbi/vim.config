@@ -50,7 +50,7 @@ else
 endif
 
 
-let g:EasyColourCustomColours = []
+"let g:EasyColourCustomColours = []
 
 
 "文本缩进设置
@@ -282,3 +282,12 @@ call SetupVAM()
 "==========自动补全==========
 "set completeopt+=longest,menuone
 "==========自动补全==========
+
+
+
+"
+if ! exists('g:TagHighlightSettings')
+    let g:TagHighlightSettings = {}
+endif
+let g:TagHighlightSettings['TagFileName'] = 'hl_tags'
+"let g:TagHighlightSettings['CtagsExecutable'] = 'ctags' "exctags
