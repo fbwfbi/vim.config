@@ -1,0 +1,9 @@
+[submodule "vimfiles/vim-addons/supertab"]
+	path = vimfiles/vim-addons/supertab
+	url = https://github.com/ervandew/supertab
+[submodule "vimfiles/vim-addons/vim-snipmate"]
+	path = vimfiles/vim-addons/vim-snipmate
+	url = https://github.com/garbas/vim-snipmate
+[submodule "vimfiles/vim-addons/vim-snippets"]
+	path = vimfiles/vim-addons/vim-snipmate
+	url = https://github.com/garbas/vim-snippets
