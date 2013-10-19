@@ -5,5 +5,5 @@
 	path = vimfiles/vim-addons/vim-snipmate
 	url = https://github.com/garbas/vim-snipmate
 [submodule "vimfiles/vim-addons/vim-snippets"]
-	path = vimfiles/vim-addons/vim-snipmate
-	url = https://github.com/garbas/vim-snippets
+	path = vimfiles/vim-addons/vim-snippets
+	url = https://github.com/honza/vim-snippets
