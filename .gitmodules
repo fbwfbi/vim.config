@@ -7,3 +7,6 @@
 [submodule "vimfiles/vim-addons/vim-snippets"]
 	path = vimfiles/vim-addons/vim-snippets
 	url = https://github.com/honza/vim-snippets
+[submodule "vimfiles/vim-addons/neocomplcache"]
+	path = vimfiles/vim-addons/neocomplcache
+	url = https://github.com/Shougo/neocomplcache.vim
