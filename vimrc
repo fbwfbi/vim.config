@@ -283,11 +283,3 @@ call SetupVAM()
 "set completeopt+=longest,menuone
 "==========自动补全==========
 
-
-
-"
-if ! exists('g:TagHighlightSettings')
-    let g:TagHighlightSettings = {}
-endif
-let g:TagHighlightSettings['TagFileName'] = 'hl_tags'
-"let g:TagHighlightSettings['CtagsExecutable'] = 'ctags' "exctags

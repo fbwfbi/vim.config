@@ -1,0 +1,3 @@
+TagFileName:hl_tags
+#CtagsExecutable:ctags #exctags
+DisableTagManager:True
