@@ -10,9 +10,8 @@ if has("win32")
     set guifont=Bitstream\ Vera\ Sans\ Mono:h14
     "set guifont=Bitstream\ Vera\ Sans\:h14
 elseif has("gui_macvim")
-    "set guifont=Droid\ Sans\ Mono:h16
-    set guifont=Bitstream\ Vera\ Sans\ Mono:h16
-    "set guifontwide=Bitstream\ Vera\ Sans\:h12
+    "set guifont=Droid\ Sans\ Mono:h15
+    set guifont=Monaco:h15
 else
     "set guifont=Bitstream\ Vera\ Sans\ Mono\ 14
     set guifont=Droid\ Sans\ Mono\ 13
