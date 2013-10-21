@@ -261,25 +261,26 @@ command! -nargs=0 BeautifyFormat call s:BeautifyFormat()
 "末尾空白
 au BufNewFile,BufRead,BufNew * match ExtraWhitespace /\s\+$/
 
-"vam start. See help file to install
-fun! SetupVAM()
-  let l:plugins = ['vimcdoc', 'vim-addon-mw-utils', 'tlib',
+fun SetupVAM()
+  let c = get(g:, 'vim_addon_manager', {})
+  let g:vim_addon_manager = c
+  let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') "expand('$HOME', 1) . '/.vim/vim-addons'
+  let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
+  " let g:vim_addon_manager = { your config here see "commented version" example and help
+  if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
+    execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+                \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
+  endif
+  call vam#ActivateAddons(['vimcdoc', 'tlib',
                   \ 'vimproc', 'sudo',
                   \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
                   \ 'unite', 'mru',
                   \ 'tComment', 'surround',
-                  \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify']
-
-  let c = get(g:, 'vim_addon_manager', {})
-  let g:vim_addon_manager = c
-  let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons')
-  let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
-  call vam#ActivateAddons(l:plugins, {'auto_install' : 0})
+                  \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
-"VAM export
+
 
 "==========自动补全==========
 "set completeopt+=longest,menuone
 "==========自动补全==========
-
