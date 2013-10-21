@@ -19,3 +19,6 @@
 [submodule "vimfiles/vim-addons/vim-addon-mw-utils"]
 	path = vimfiles/vim-addons/vim-addon-mw-utils
 	url = git://github.com/MarcWeber/vim-addon-mw-utils
+[submodule "starry"]
+	path = starry
+	url = git@github.com:penglei/starry.git
