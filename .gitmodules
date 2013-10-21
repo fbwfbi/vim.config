@@ -10,3 +10,12 @@
 [submodule "vimfiles/vim-addons/neocomplcache"]
 	path = vimfiles/vim-addons/neocomplcache
 	url = https://github.com/Shougo/neocomplcache.vim
+[submodule "vimfiles/vim-addons/vim-addon-manager"]
+	path = vimfiles/vim-addons/vim-addon-manager
+	url = git://github.com/MarcWeber/vim-addon-manager
+[submodule "vimfiles/vim-addons/vim-addon-manager-known-repositories"]
+	path = vimfiles/vim-addons/vim-addon-manager-known-repositories
+	url = git://github.com/MarcWeber/vim-addon-manager-known-repositories
+[submodule "vimfiles/vim-addons/vim-addon-mw-utils"]
+	path = vimfiles/vim-addons/vim-addon-mw-utils
+	url = git://github.com/MarcWeber/vim-addon-mw-utils
