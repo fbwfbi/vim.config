@@ -7,10 +7,10 @@ UseProjectRepository:True
 ProjectRepository:/home/penglei/.taghl
 
 #这个特性不完善，无法把一个projects中的生成的文件都放到指定目录中
-Projects:
-	WebKit_Gtk:
-		TagFileDirectory:/home/penglei/.taghl/WebKit_Gtk/tagfile
-		TypesFileDirectory:/home/penglei/.taghl/WebKit_Gtk/typesfile
-		SourceDir:/var/workroom/webkit/Tools/GtkLauncher
-		IncludeSynMatches:True
-		Recurse:False
+#Projects:
+	#WebKit_Gtk:
+		##TagFileDirectory:/home/penglei/.taghl/WebKit_Gtk/tagfile
+		##TypesFileDirectory:/home/penglei/.taghl/WebKit_Gtk/typesfile
+		#SourceDir:/var/workroom/webkit/Tools/GtkLauncher
+		#IncludeSynMatches:True
+		#Recurse:False
