@@ -22,17 +22,9 @@
 "
 " }}}
 
-" Global Variables {{{
-
-if !exists("g:EclimJavascriptValidate")
-  let g:EclimJavascriptValidate = 1
-endif
-
-" }}}
-
 " Options {{{
 
-"exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#javascript#complete#CodeComplete'
+exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#javascript#complete#CodeComplete'
 
 " }}}
 

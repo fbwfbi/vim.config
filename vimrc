@@ -107,7 +107,7 @@ set cursorline              " 突出显示当前行
 set magic                   " 设置魔术，对搜索字符串有应用
 
 "The commandbar is 2 line high(Ex模式)
-set cmdheight=1
+"set cmdheight=1
 
 "Show line number 显示行号
 set nu
