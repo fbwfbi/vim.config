@@ -23,7 +23,7 @@
 
 " Options {{{
 
-"exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#xml#complete#CodeComplete'
+exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#xml#complete#CodeComplete'
 
 " }}}
 

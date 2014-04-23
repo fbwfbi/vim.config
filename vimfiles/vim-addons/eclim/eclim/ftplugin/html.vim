@@ -36,7 +36,7 @@ endif
 
 " Options {{{
 
-"exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#html#complete#CodeComplete'
+exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#html#complete#CodeComplete'
 
 " disable syntastic
 if exists('g:loaded_syntastic_plugin') && !g:EclimHtmlSyntasticEnabled

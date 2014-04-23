@@ -32,7 +32,7 @@ endif
 
 " Options {{{
 
-"exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#css#complete#CodeComplete'
+exec 'setlocal ' . g:EclimCompletionMethod . '=eclim#css#complete#CodeComplete'
 
 " }}}
 
