@@ -276,7 +276,7 @@ fun SetupVAM()
                   \ 'vimproc', 'sudo',
                   \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
                   \ 'unite', 'mru',
-                  \ 'tComment', 'surround',
+                  \ 'tComment', 'surround', 'vim-less',
                   \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
