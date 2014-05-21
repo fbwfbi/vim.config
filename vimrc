@@ -67,7 +67,8 @@ function! CustomSetTab()
     set expandtab
 endfunction
 
-"set autoindent
+"通常，使用 'smartindent' 时也应该打开 'autoindent'。
+set autoindent
 set smartindent
 
 set noeb
