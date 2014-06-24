@@ -253,6 +253,8 @@ function s:BeautifyFormat()
         call CSSBeautify()
     elseif (ext == 'html')
         call HtmlBeautify()
+    elseif (ext == 'c' || ext == 'cc' || ext == 'cpp')
+        execute 'Autoformat'
     endif
 endfunction
 
@@ -277,6 +279,7 @@ fun SetupVAM()
                   \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
                   \ 'unite', 'mru',
                   \ 'tComment', 'surround', 'vim-less',
+                  \ 'vim-autoformat',
                   \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
