@@ -234,7 +234,7 @@ nmap <F3> :CommandT<CR>
 "most recently update
 map <F4> :MRU<CR>
 
-"{{ jsbeautify
+"{{ beautify
 "let g:plugin_Root_direcoty = $VIM . "/vimfiles/vim-addons/jsbeautify/"
 "map <c-f> :call JsBeautify()<cr>
 " or{
@@ -258,6 +258,10 @@ function s:BeautifyFormat()
     endif
 endfunction
 
+let g:formatprg_args_expr_cs = '"--mode=cs --style=kr --indent-namespaces -pcH".(&expandtab ? "s".&shiftwidth : "t")'
+let g:formatprg_args_expr_c = '"--mode=c --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
+let g:formatprg_args_expr_cpp = '"--mode=c --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
+let g:formatprg_args_expr_java = '"--mode=java --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
 command! -nargs=0 BeautifyFormat call s:BeautifyFormat()
 "}}
 
