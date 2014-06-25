@@ -253,7 +253,7 @@ function s:BeautifyFormat()
         call CSSBeautify()
     elseif (ext == 'html')
         call HtmlBeautify()
-    elseif (ext == 'c' || ext == 'cc' || ext == 'cpp')
+    elseif (ext == 'c' || ext == 'cc' || ext == 'cpp' || ext == 'h')
         execute 'Autoformat'
     endif
 endfunction
