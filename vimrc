@@ -75,13 +75,12 @@ set noeb
 
 set showcmd         " 输入的命令显示出来，看的清楚些
 "状态行显示的内容
-"set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}
-function! CurrectDir()
-    let curdir = substitute(getcwd(), "", "", "g")
-    return curdir
-endfunction
-"set statusline=\ [PWD]\ %r%{CurrectDir()}%h\ \ [File]\ %f%m%r%h\ %w\ %=[L\ %l,R\ %c,T\ %L]\ %=\ %P
-set statusline=\ [PWD]\ %r%{CurrectDir()}%h\ \ [File]\ %f%m%r%h\ %w\ \ \ \ [L\ %l,R\ %c,T\ %L]\ \ %P
+"function! CurrectDir()
+    "let curdir = substitute(getcwd(), '', '', 'g')
+    "return curdir
+"endfunction
+"set statusline=\{%r%{CurrectDir()}\/%h%f%m%r%h\ %w(%{strlen(&fenc)?&fenc:'none'},%{&ff},%y)\ \ \ %=[L\ %l,R\ %c,T\ %L]\ \ %P\}
+set statusline=%r\ %F%m%h%w\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%y\ \ \ %=[L\ %l,R\ %c,T\ %L]\ %P
 set laststatus=2    " 启动显示状态行(1),总是显示状态行(2)
 
 "自动切换目录
@@ -283,7 +282,7 @@ fun SetupVAM()
                   \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
                   \ 'unite', 'mru',
                   \ 'tComment', 'surround', 'vim-less',
-                  \ 'vim-autoformat',
+                  \ 'vim-autoformat', 'ctrlp',
                   \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
