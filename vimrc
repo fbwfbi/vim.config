@@ -228,8 +228,17 @@ let g:winManagerWindowLayout='FileExplorer'
 nmap <leader>e :WMToggle<CR>
 
 "command-t
-nmap <F3> :CommandT<CR>
+"nmap <F3> :CommandT<CR>
 
+let g:ctrlp_map = '<F3>'
+let g:ctrlp_open_multiple_files = 'v'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
+set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+  \ 'file': '\v\.(exe|so|dll)$',
+  \ 'link': '__some_bad_symbolic_links__'
+  \ }
 "most recently update
 map <F4> :MRU<CR>
 
