@@ -28,9 +28,6 @@ language messages zh_CN.utf-8
 "自动编码检测
 set fencs=utf-8,gbk,ucs-bom,gb18030,gb2312,cp936
 
-"添加第三方执行路径 VAM
-"exe 'set runtimepath+='. $VIM .'/vimfiles/third_runtimepath/vim-addon-manager'
-
 filetype plugin indent on
 syntax on
 
@@ -217,9 +214,6 @@ let Tlist_Exit_OnlyWindow=1 "当taglist是最后一个分割窗口时，自动�
 let Tlist_Process_File_Always=0 "是否一直处理tags.1:处理;0:不处理。不是一直实时更新tags，因为没有必要
 let Tlist_Inc_Winwidth=0
 
-"vimball默认安装路径配置
-"let g:vimball_home=$VIM . "/vimfiles"
-
 "winmanager
 let g:winManagerWindowLayout='FileExplorer'
 "let g:winManagerWindowLayout='FileExplorer|TagList'
@@ -235,16 +229,14 @@ let g:ctrlp_open_multiple_files = 'v'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
 set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\v[\/]\.(git|hg|svn)$',
-  \ 'file': '\v\.(exe|so|dll)$',
-  \ 'link': '__some_bad_symbolic_links__'
-  \ }
+            \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+            \ 'file': '\v\.(exe|so|dll)$',
+            \ 'link': '__some_bad_symbolic_links__'
+            \ }
 "most recently update
 map <F4> :MRU<CR>
 
 "{{ beautify
-"let g:plugin_Root_direcoty = $VIM . "/vimfiles/vim-addons/jsbeautify/"
-"map <c-f> :call JsBeautify()<cr>
 " or{
 "autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
 " for html
@@ -276,31 +268,28 @@ command! -nargs=0 BeautifyFormat call s:BeautifyFormat()
 au BufNewFile,BufRead,BufNew * match ExtraWhitespace /\s\+$/
 
 fun SetupVAM()
-  let c = get(g:, 'vim_addon_manager', {})
-  let g:vim_addon_manager = c
+    let c = get(g:, 'vim_addon_manager', {})
+    let g:vim_addon_manager = c
 
-  "{
-  let c.my_config_dir= expand('$HOME', 1) . '/.vim/vim.config'
-  let c.new_runtime_dir = c.my_config_dir . '/vimfiles'
-  let &rtp.=(empty(&rtp)?'':',').c.new_runtime_dir
-  let c.plugin_root_dir = c.new_runtime_dir . '/vim-addons'
-  let &rtp.=','.c.plugin_root_dir.'/vim-addon-manager'
-  "-----
-  "let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') 
-  "let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
-  "}
+    "{
+    "let $VIM = expand('$HOME', 1) . '/.vim/vim.config'
+    "let c.plugin_root_dir = expand("$VIM/vimfiles/vim-addons")
+    "-----
+    let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') 
+    "}
 
-  if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
-    execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
-                \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
-  endif
-  call vam#ActivateAddons(['vimcdoc', 'tlib',
-                  \ 'vimproc', 'sudo',
-                  \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
-                  \ 'unite', 'mru',
-                  \ 'tComment', 'surround', 'vim-less',
-                  \ 'vim-autoformat', 'ctrlp', 'vcscommand',
-                  \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
+    let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
+    if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
+        execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
+                    \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
+    endif
+    call vam#ActivateAddons(['vimcdoc', 'tlib',
+                \ 'vimproc', 'sudo',
+                \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
+                \ 'unite', 'mru',
+                \ 'tComment', 'surround', 'vim-less',
+                \ 'vim-autoformat', 'ctrlp', 'vcscommand',
+                \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
 
