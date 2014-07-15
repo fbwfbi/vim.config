@@ -278,9 +278,18 @@ au BufNewFile,BufRead,BufNew * match ExtraWhitespace /\s\+$/
 fun SetupVAM()
   let c = get(g:, 'vim_addon_manager', {})
   let g:vim_addon_manager = c
-  let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') "expand('$HOME', 1) . '/.vim/vim-addons'
+
+  "{
+  "let c.my_config_dir= expand('$HOME', 1) . '/.vim/vim.config'
+  "let c.new_runtime_dir = c.my_config_dir . '/vimfiles'
+  "let &rtp.=(empty(&rtp)?'':',').c.new_runtime_dir
+  "let c.plugin_root_dir = c.new_runtime_dir . '/vim-addons'
+  "let &rtp.=','.c.plugin_root_dir.'/vim-addon-manager'
+  "-----
+  let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') 
   let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
-  " let g:vim_addon_manager = { your config here see "commented version" example and help
+  "}
+
   if !isdirectory(c.plugin_root_dir.'/vim-addon-manager/autoload')
     execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '
                 \       shellescape(c.plugin_root_dir.'/vim-addon-manager', 1)
