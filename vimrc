@@ -266,10 +266,9 @@ function s:BeautifyFormat()
     endif
 endfunction
 
-let g:formatprg_args_expr_cs = '"--mode=cs --style=kr --indent-namespaces -pcH".(&expandtab ? "s".&shiftwidth : "t")'
-let g:formatprg_args_expr_c = '"--mode=c --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
-let g:formatprg_args_expr_cpp = '"--mode=c --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
-let g:formatprg_args_expr_java = '"--mode=java --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
+let g:formatprg_args_expr_c = '"--mode=c --suffix=none --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
+let g:formatprg_args_expr_cpp = '"--mode=c --suffix=none --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
+let g:formatprg_args_expr_java = '"--mode=java --suffix=none --style=kr -pcH".(&expandtab ? "s".&shiftwidth : "t")'
 command! -nargs=0 BeautifyFormat call s:BeautifyFormat()
 "}}
 
@@ -291,7 +290,7 @@ fun SetupVAM()
                   \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
                   \ 'unite', 'mru',
                   \ 'tComment', 'surround', 'vim-less',
-                  \ 'vim-autoformat', 'ctrlp',
+                  \ 'vim-autoformat', 'ctrlp', 'vcscommand',
                   \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
