@@ -267,6 +267,10 @@ command! -nargs=0 BeautifyFormat call s:BeautifyFormat()
 "末尾空白
 au BufNewFile,BufRead,BufNew * match ExtraWhitespace /\s\+$/
 
+"git 提交message限制长度
+"git commit不指定-m 或者 -F 参数，git就会用config里的编辑器打开一个filetype为 gitcommit 的文件来写注释
+autocmd Filetype gitcommit setlocal spell textwidth=72
+
 fun SetupVAM()
     let c = get(g:, 'vim_addon_manager', {})
     let g:vim_addon_manager = c
