@@ -224,17 +224,17 @@ nmap <leader>e :WMToggle<CR>
 "command-t
 "nmap <F3> :CommandT<CR>
 
-let g:ctrlp_map = '<F3>'
-let g:ctrlp_open_multiple_files = 'v'
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
-set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
-let g:ctrlp_custom_ignore = {
-            \ 'dir':  '\v[\/]\.(git|hg|svn)$',
-            \ 'file': '\v\.(exe|so|dll)$',
-            \ 'link': '__some_bad_symbolic_links__'
-            \ }
-"most recently update
-map <F4> :MRU<CR>
+" let g:ctrlp_map = '<F3>'
+" let g:ctrlp_open_multiple_files = 'v'
+" set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
+" set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
+" let g:ctrlp_custom_ignore = {
+"             \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+"             \ 'file': '\v\.(exe|so|dll)$',
+"             \ 'link': '__some_bad_symbolic_links__'
+"             \ }
+" "most recently update
+" map <F4> :MRU<CR>
 
 "{{ beautify
 " or{
@@ -276,10 +276,10 @@ fun SetupVAM()
     let g:vim_addon_manager = c
 
     "{
-    "let $VIM = expand('$HOME', 1) . '/.vim/vim.config'
-    "let c.plugin_root_dir = expand("$VIM/vimfiles/vim-addons")
+    let $VIM = expand('$HOME', 1) . '/.vim/vim.config'
+    let c.plugin_root_dir = expand("$VIM/vimfiles/vim-addons")
     "-----
-    let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') 
+    "let c.plugin_root_dir = expand('$VIM/vimfiles/vim-addons') 
     "}
 
     let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
@@ -289,10 +289,10 @@ fun SetupVAM()
     endif
     call vam#ActivateAddons(['vimcdoc', 'tlib',
                 \ 'vimproc', 'sudo',
-                \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab', 
+                \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab',
                 \ 'unite', 'mru',
                 \ 'tComment', 'surround', 'vim-less',
-                \ 'vim-autoformat', 'ctrlp', 'vcscommand',
+                \ 'vim-autoformat', 'LeaderF', 'jedi-vim',
                 \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
 endfun
 call SetupVAM()
