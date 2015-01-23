@@ -1,7 +1,6 @@
 "=============================================================================
 " FILE: rec.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" Last Modified: 28 Sep 2013.
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -31,22 +30,21 @@ set cpo&vim
 call unite#util#set_default(
       \ 'g:unite_source_rec_ignore_pattern',
       \'\%(^\|/\)\.$\|\~$\|\.\%(o\|exe\|dll\|bak\|DS_Store\|zwc\|pyc\|sw[po]\|class\)$'.
-      \'\|\%(^\|/\)\%(\.hg\|\.git\|\.bzr\|\.svn\|tags\%(-.*\)\?\)\%($\|/\)',
+      \'\|\%(^\|/\)\%(\.hg\|\.git\|\.bzr\|\.svn\|tags\%(-\a\+\)\?\)\%($\|/\)',
       \ 'g:unite_source_file_rec_ignore_pattern')
 call unite#util#set_default(
       \ 'g:unite_source_rec_min_cache_files', 100,
       \ 'g:unite_source_file_rec_min_cache_files')
 call unite#util#set_default(
-      \ 'g:unite_source_rec_max_cache_files', 2000,
+      \ 'g:unite_source_rec_max_cache_files', 20000,
       \ 'g:unite_source_file_rec_max_cache_files')
-call unite#util#set_default('g:unite_source_rec_unit', 200)
+call unite#util#set_default('g:unite_source_rec_unit', 4000)
 call unite#util#set_default(
-      \ 'g:unite_source_rec_async_command',
-      \ (executable('ag') ?
-      \  'ag --nocolor --nogroup --skip-vcs-ignores --ignore ' .
-      \  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'' --hidden -g ""' :
+      \ 'g:unite_source_rec_async_command', (
       \  !unite#util#is_windows() && executable('find') ? 'find' : ''),
       \ 'g:unite_source_file_rec_async_command')
+call unite#util#set_default(
+      \ 'g:unite_source_rec_git_command', 'git')
 "}}}
 
 let s:Cache = unite#util#get_vital().import('System.Cache')
@@ -61,8 +59,8 @@ let s:source_file_rec = {
       \ 'default_kind' : 'file',
       \ 'max_candidates' : 50,
       \ 'ignore_pattern' : g:unite_source_rec_ignore_pattern,
-      \ 'matchers' : [ 'matcher_default', 'matcher_hide_hidden_files' ],
-      \ 'converters' : 'converter_relative_word',
+      \ 'matchers' : [ 'converter_relative_word',
+      \                'matcher_default', 'matcher_hide_hidden_files' ],
       \ }
 
 function! s:source_file_rec.gather_candidates(args, context) "{{{
@@ -100,17 +98,18 @@ function! s:source_file_rec.async_gather_candidates(args, context) "{{{
 
   let [continuation.rest, files] =
         \ s:get_files(a:context, continuation.rest,
-        \   1, g:unite_source_rec_unit,
-        \   a:context.source.ignore_pattern)
+        \   1, g:unite_source_rec_unit)
 
-  if empty(continuation.rest) || len(continuation.files) >
-        \                    g:unite_source_rec_max_cache_files
+  if empty(continuation.rest) || (
+        \  g:unite_source_rec_max_cache_files > 0 &&
+        \    len(continuation.files) >
+        \        g:unite_source_rec_max_cache_files)
     if empty(continuation.rest)
       call unite#print_source_message(
             \ 'Directory traverse was completed.', self.name)
     else
       call unite#print_source_message(
-            \ 'Too many candiates.', self.name)
+            \ 'Too many candidates.', self.name)
     endif
 
     " Disable async.
@@ -118,11 +117,7 @@ function! s:source_file_rec.async_gather_candidates(args, context) "{{{
     let continuation.end = 1
   endif
 
-  let candidates = map(files, "{
-        \ 'word' : unite#util#substitute_path_separator(
-        \    fnamemodify(v:val, ':p')),
-        \ 'action__path' : v:val,
-        \ }")
+  let candidates = unite#helper#paths2candidates(files)
 
   let continuation.files += candidates
   if empty(continuation.rest)
@@ -136,15 +131,6 @@ endfunction"}}}
 function! s:source_file_rec.hooks.on_init(args, context) "{{{
   let a:context.source__is_directory = 0
   call s:on_init(a:args, a:context)
-endfunction"}}}
-function! s:source_file_rec.hooks.on_post_filter(args, context) "{{{
-  let directory = unite#util#substitute_path_separator(
-        \ fnamemodify(a:context.source__directory, ':p'))
-  for candidate in filter(a:context.candidates,
-        \ "v:val.action__path !=# directory")
-    let candidate.action__directory =
-          \ unite#util#path2directory(candidate.action__path)
-  endfor
 endfunction"}}}
 
 function! s:source_file_rec.vimfiler_check_filetype(args, context) "{{{
@@ -308,10 +294,19 @@ function! s:source_file_async.gather_candidates(args, context) "{{{
     return []
   endif
 
-  let a:context.source__proc = vimproc#pgroup_open(
-        \ command . ' ' . string(directory)
-        \ . (command ==# 'find' ? ' -type '.
-        \    (a:context.source__is_directory ? 'd' : 'f') : ''))
+  " Note: If find command and args used, uses whole command line.
+  if args[0] ==# 'find'
+    let command .= ' ' . string(directory)
+
+    if g:unite_source_rec_async_command ==# 'find'
+      " Default option.
+      let command .= ' -path ''*/\.git/*'' -prune -o -type l -print -o -type '
+            \ . (a:context.source__is_directory ? 'd' : 'f') . ' -print'
+    endif
+  else
+    let command .= ' ' . string(directory)
+  endif
+  let a:context.source__proc = vimproc#pgroup_open(command, 1)
 
   " Close handles.
   call a:context.source__proc.stdin.close()
@@ -333,29 +328,26 @@ function! s:source_file_async.async_gather_candidates(args, context) "{{{
   let continuation = a:context.source__continuation
   let stdout = a:context.source__proc.stdout
 
-  let candidates = []
-  for filename in map(filter(
-        \ stdout.read_lines(-1, 100), 'v:val != ""'),
-        \ "fnamemodify(unite#util#iconv(v:val, 'char', &encoding), ':p')")
-    if filename !=# a:context.source__directory
-          \ && filename !~? a:context.source.ignore_pattern
-      call add(candidates, {
-            \ 'word' : unite#util#substitute_path_separator(
-            \    fnamemodify(filename, ':p')),
-            \ 'action__path' : filename,
-            \ })
-    endif
-  endfor
+  let paths = map(filter(
+        \   stdout.read_lines(-1, 2000), 'v:val != ""'),
+        \   "fnamemodify(unite#util#iconv(v:val, 'char', &encoding), ':p')")
+  if unite#util#is_windows()
+    let paths = map(paths, 'unite#util#substitute_path_separator(v:val)')
+  endif
 
-  if stdout.eof || len(continuation.files) >
-        \        g:unite_source_rec_max_cache_files
+  let candidates = unite#helper#paths2candidates(paths)
+
+  if stdout.eof || (
+        \  g:unite_source_rec_max_cache_files > 0 &&
+        \    len(continuation.files) >
+        \        g:unite_source_rec_max_cache_files)
     " Disable async.
     if stdout.eof
       call unite#print_source_message(
             \ 'Directory traverse was completed.', self.name)
     else
       call unite#print_source_message(
-            \ 'Too many candiates.', self.name)
+            \ 'Too many candidates.', self.name)
     endif
     let a:context.is_async = 0
     let continuation.end = 1
@@ -381,6 +373,64 @@ function! s:source_file_async.hooks.on_close(args, context) "{{{
     call a:context.source__proc.kill()
   endif
 endfunction "}}}
+
+" Source git.
+let s:source_file_git = deepcopy(s:source_file_async)
+let s:source_file_git.name = 'file_rec/git'
+let s:source_file_git.description =
+      \ 'git candidates from directory by recursive'
+function! s:source_file_git.gather_candidates(args, context) "{{{
+  if !unite#util#has_vimproc()
+    call unite#print_source_message(
+          \ 'vimproc plugin is not installed.', self.name)
+    let a:context.is_async = 0
+    return []
+  endif
+
+  let a:context.source__directory = getcwd()
+  let directory = a:context.source__directory
+  if finddir('.git', ';') == ''
+    " Not in git directory.
+    call unite#print_source_message(
+          \ 'Not in git directory.', self.name)
+    let a:context.is_async = 0
+    return []
+  endif
+
+  call unite#print_source_message(
+        \ 'directory: ' . directory, self.name)
+
+  call s:init_continuation(a:context, directory)
+
+  let continuation = a:context.source__continuation
+
+  if empty(continuation.rest) || continuation.end
+    " Disable async.
+    call unite#print_source_message(
+          \ 'Directory traverse was completed.', self.name)
+    let a:context.is_async = 0
+    let continuation.end = 1
+
+    return deepcopy(continuation.files)
+  endif
+
+  let command = g:unite_source_rec_git_command
+        \ . ' ls-files --full-name ' . join(a:args)
+  let args = split(command) + a:args
+  if empty(args) || !executable(args[0])
+    call unite#print_source_message('git command : "'.
+          \ command.'" is not executable.', self.name)
+    let a:context.is_async = 0
+    return []
+  endif
+
+  let a:context.source__proc = vimproc#pgroup_open(command)
+
+  " Close handles.
+  call a:context.source__proc.stdin.close()
+
+  return []
+endfunction"}}}
 
 " Source directory.
 let s:source_directory_rec = deepcopy(s:source_file_rec)
@@ -408,34 +458,28 @@ endfunction"}}}
 
 " Misc.
 function! s:get_path(args, context) "{{{
-  let directory = get(
-        \ filter(copy(a:args), "v:val != '!'"), 0, '')
+  let args = unite#helper#parse_project_bang(a:args)
+  let directory = get(args, 0, '')
   if directory == ''
-    let directory = isdirectory(a:context.input) ?
-          \ a:context.input : getcwd()
+    let directory = isdirectory(a:context.path) ?
+          \ a:context.path : getcwd()
   endif
 
-  if a:context.is_restart
+  if a:context.unite__is_restart
     let directory = unite#util#input('Target: ',
           \ directory, 'dir', a:context.source_name)
   endif
 
-  if get(a:args, 0, '') == '!'
-    " Use project directory.
-    return unite#util#path2project_directory(directory, 1)
-  endif
-
   let directory = unite#util#substitute_path_separator(
-        \ substitute(fnamemodify(directory, ':p'), '^\~',
-        \ unite#util#substitute_path_separator($HOME), ''))
+        \ fnamemodify(unite#util#expand(directory), ':p'))
 
-  if directory =~ '/$'
+  if directory != '/' && directory =~ '/$'
     let directory = directory[: -2]
   endif
 
   return directory
 endfunction"}}}
-function! s:get_files(context, files, level, max_unit, ignore_pattern) "{{{
+function! s:get_files(context, files, level, max_unit) "{{{
   let continuation_files = []
   let ret_files = []
   let files_index = 0
@@ -443,7 +487,7 @@ function! s:get_files(context, files, level, max_unit, ignore_pattern) "{{{
   for file in a:files
     let files_index += 1
 
-    if file =~ '/\.\+$' || file =~? a:ignore_pattern
+    if file =~? '/\.\+$\|/\%(\.hg\|\.git\|\.bzr\|\.svn\)/'
       continue
     endif
 
@@ -468,12 +512,12 @@ function! s:get_files(context, files, level, max_unit, ignore_pattern) "{{{
       let child_index = 0
       let children = exists('*vimproc#readdir') ?
             \ vimproc#readdir(file) :
-            \ unite#util#glob(file.'/*') + unite#util#glob(file.'/.*')
+            \ unite#util#glob(file.'/*')
       for child in children
         let child = substitute(child, '\/$', '', '')
         let child_index += 1
 
-        if child =~ '/\.\+$' || child =~? a:ignore_pattern
+        if child =~? '/\.\+$\|/\%(\.hg\|\.git\|\.bzr\|\.svn\)/'
           continue
         endif
 
@@ -493,7 +537,7 @@ function! s:get_files(context, files, level, max_unit, ignore_pattern) "{{{
           if a:level < 5 && ret_files_len < a:max_unit
             let [continuation_files_child, ret_files_child] =
                   \ s:get_files(a:context, [child], a:level + 1,
-                  \  a:max_unit - ret_files_len, a:ignore_pattern)
+                  \  a:max_unit - ret_files_len)
             let continuation_files += continuation_files_child
 
             if !a:context.source__is_directory
@@ -536,7 +580,7 @@ function! s:on_init(args, context) "{{{
   augroup END
 endfunction"}}}
 function! s:init_continuation(context, directory) "{{{
-  let cache_dir = g:unite_data_directory . '/rec/' .
+  let cache_dir = unite#get_data_directory() . '/rec/' .
         \ (a:context.source__is_directory ? 'directory' : 'file')
   let continuation = (a:context.source__is_directory) ?
         \ s:continuation.directory : s:continuation.file
@@ -545,19 +589,15 @@ function! s:init_continuation(context, directory) "{{{
         \ && s:Cache.filereadable(cache_dir, a:directory)
     " Use cache file.
 
-    let files = map(s:Cache.readfile(cache_dir, a:directory), "{
-          \   'word' : unite#util#substitute_path_separator(
-          \      fnamemodify(v:val, ':p')),
-          \   'action__path' : v:val,
-          \ }")
+    let files = unite#helper#paths2candidates(
+          \ s:Cache.readfile(cache_dir, a:directory))
 
     let continuation[a:directory] = {
           \ 'files' : files,
           \ 'rest' : [],
           \ 'directory' : a:directory, 'end' : 1,
           \ }
-  elseif a:context.is_redraw
-        \ || !has_key(continuation, a:directory)
+  else
     let a:context.is_async = 1
 
     let continuation[a:directory] = {
@@ -574,10 +614,11 @@ function! s:init_continuation(context, directory) "{{{
         \   'filereadable(v:val.action__path)')
 endfunction"}}}
 function! s:write_cache(context, directory, files) "{{{
-  let cache_dir = g:unite_data_directory . '/rec/' .
+  let cache_dir = unite#get_data_directory() . '/rec/' .
         \ (a:context.source__is_directory ? 'directory' : 'file')
 
-  if g:unite_source_rec_min_cache_files > 0
+  if g:unite_source_rec_min_cache_files >= 0
+        \ && !unite#util#is_sudo()
         \ && len(a:files) >
         \ g:unite_source_rec_min_cache_files
     call s:Cache.writefile(cache_dir, a:directory,
@@ -616,6 +657,7 @@ endfunction"}}}
 function! unite#sources#rec#define() "{{{
   let sources = [ s:source_file_rec, s:source_directory_rec ]
   let sources += [ s:source_file_async, s:source_directory_async]
+  let sources += [ s:source_file_git ]
   return sources
 endfunction"}}}
 

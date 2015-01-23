@@ -1,7 +1,6 @@
 "=============================================================================
 " FILE: candidates.vim
 " AUTHOR: Shougo Matsushita <Shougo.Matsu@gmail.com>
-" Last Modified: 01 Oct 2013.
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -44,6 +43,34 @@ function! unite#candidates#_recache(input, is_force) "{{{
   let context = unite.context
   let context.is_redraw = a:is_force
   let context.is_changed = a:input !=# unite.last_input
+        \ || context.path !=# unite.last_path
+
+  if empty(unite.args)
+    if a:input == ''
+      let sources = []
+    elseif a:input !~ '^.\{-}\%(\\\@<!\s\)\+'
+      " Use interactive source.
+      let sources = unite#init#_loaded_sources(['interactive'], context)
+    else
+      " Use specified source.
+      let args = unite#helper#parse_options_args(
+            \ matchstr(a:input, '^.\{-}\%(\\\@<!\s\)\+'))[0]
+      try
+        let sources = unite#init#_loaded_sources(args, context)
+      catch
+        let sources = []
+      endtry
+    endif
+
+    if unite.sources !=# sources
+      let unite.sources = sources
+      let unite.source_names = unite#helper#get_source_names(sources)
+
+      " Initialize.
+      call unite#helper#call_hook(sources, 'on_init')
+      call unite#view#_set_syntax()
+    endif
+  endif
 
   for source in unite.sources
     let source.unite__candidates = []
@@ -56,13 +83,16 @@ function! unite#candidates#_recache(input, is_force) "{{{
     call s:recache_candidates_loop(context, a:is_force)
   endfor
 
+  " Restore prompt input
+  let context.input = a:input
+
   let filtered_count = 0
 
   for source in unite.sources
     let source.unite__is_invalidate = 0
 
-    if !context.no_buffer && source.max_candidates != 0
-          \ && !context.unite__is_interactive
+    if !context.unite__not_buffer && source.max_candidates != 0
+          \ && context.unite__is_interactive
           \ && !unite.disabled_max_candidates
           \ && len(source.unite__candidates) > source.max_candidates
       " Filtering too many candidates.
@@ -77,6 +107,11 @@ function! unite#candidates#_recache(input, is_force) "{{{
       endif
     endif
 
+    if source.is_grouped
+      let source.unite__candidates =
+            \ unite#candidates#_group_post_filters(source.unite__candidates)
+    endif
+
     " Call post_filter hook.
     let source.unite__context.candidates =
           \ source.unite__candidates
@@ -85,6 +120,7 @@ function! unite#candidates#_recache(input, is_force) "{{{
     let source.unite__candidates =
           \ unite#init#_candidates_source(
           \   source.unite__context.candidates, source.name)
+    let source.unite__len_candidates = len(source.unite__candidates)
   endfor
 
   " Update async state.
@@ -104,7 +140,16 @@ function! unite#candidates#gather(...) "{{{
     let unite.candidates += source.unite__candidates
   endfor
 
-  if is_gather_all
+  if unite.context.prompt_direction ==# 'below'
+    let unite.candidates = reverse(unite.candidates)
+  endif
+
+  if unite.context.unique
+    " Uniq filter.
+    let unite.candidates = unite#util#uniq_by(unite.candidates, 'v:val.word')
+  endif
+
+  if is_gather_all || unite.context.prompt_direction ==# 'below'
     let unite.candidates_pos = len(unite.candidates)
   elseif unite.context.is_redraw || unite.candidates_pos == 0
     let unite.candidates_pos = line('.') + winheight(0)
@@ -112,6 +157,27 @@ function! unite#candidates#gather(...) "{{{
 
   let candidates = unite#init#_candidates(
         \ unite.candidates[: unite.candidates_pos-1])
+
+  let unite.candidates_len = len(candidates) +
+        \ len(unite.candidates[unite.candidates_pos :])
+  if unite.context.prompt_direction ==# 'below'
+    if unite.prompt_linenr == 0
+      let unite.init_prompt_linenr = unite.candidates_len + 1
+    else
+      let unite.prompt_linenr = unite.candidates_len
+      if unite.prompt_linenr == 0
+        let unite.prompt_linenr = 1
+      endif
+    endif
+  endif
+
+  if empty(candidates) && unite.prompt_linenr == 0
+    let unite.prompt_linenr = 1
+  endif
+
+  let unite.context.unite__max_candidates = 0
+  let unite.context.input_list =
+        \ split(unite.context.input, '\\\@<! ', 1)
 
   " Post filter.
   for filter_name in unite.post_filters
@@ -161,6 +227,7 @@ function! s:recache_candidates_loop(context, is_force) "{{{
     " Set context.
     let context = source.unite__context
     let context.input = a:context.input
+    let context.path = a:context.path
     let context.source_name = source.name
 
     if source.required_pattern_length > 0
@@ -175,19 +242,16 @@ function! s:recache_candidates_loop(context, is_force) "{{{
     let context.is_invalidate = source.unite__is_invalidate
     let context.is_list_input = a:context.is_list_input
     let context.input_list = split(context.input, '\\\@<! ', 1)
-    let context.path = get(filter(copy(context.input_list),
-        \         "v:val !~ '^[!:]'"), 0, '')
     let context.unite__max_candidates =
           \ (unite.disabled_max_candidates ? 0 : source.max_candidates)
+    if context.unite__is_vimfiler
+      " Disable ignore feature.
+      let source.ignore_pattern = ''
+    endif
 
     let source_candidates = s:get_source_candidates(source)
 
     let custom_source = get(custom.sources, source.name, {})
-    if source.ignore_pattern != '' && !context.unite__is_vimfiler
-      call filter(source_candidates,
-            \ "get(v:val, 'action__path', v:val.word)
-            \             !~# source.ignore_pattern")
-    endif
 
     " Call pre_filter hook.
     let context.candidates = source_candidates
@@ -258,7 +322,6 @@ function! s:recache_candidates_loop(context, is_force) "{{{
     let a:context.execute_command = context.execute_command
 
     let source.unite__candidates += source_candidates
-    let source.unite__len_candidates = len(source_candidates)
     if !empty(source_candidates)
       call add(candidate_sources,
             \ unite#helper#convert_source_name(source.name))
@@ -273,6 +336,9 @@ endfunction"}}}
 
 function! s:get_source_candidates(source) "{{{
   let context = a:source.unite__context
+  let custom_source = get(unite#custom#get().sources, a:source.name, {})
+  let ignore_pattern = get(custom_source,
+        \ 'ignore_pattern', a:source.ignore_pattern)
 
   let funcname = 's:get_source_candidates()'
   try
@@ -297,23 +363,11 @@ function! s:get_source_candidates(source) "{{{
       let funcname = 'gather_candidates'
       if has_key(a:source, 'gather_candidates')
         let a:source.unite__cached_candidates +=
-              \ copy(a:source.gather_candidates(a:source.args,
-              \ a:source.unite__context))
+              \ s:ignore_candidates(copy(
+              \  a:source.gather_candidates(a:source.args,
+              \  a:source.unite__context)),
+              \ ignore_pattern, context.path)
       endif
-    endif
-
-    if a:source.unite__context.is_async
-      " Get asynchronous candidates.
-      let funcname = 'async_gather_candidates'
-      while 1
-        let a:source.unite__cached_candidates +=
-              \ a:source.async_gather_candidates(a:source.args, context)
-
-        if context.unite__is_interactive
-              \ || !a:source.unite__context.is_async
-          break
-        endif
-      endwhile
     endif
 
     if has_key(a:source, 'change_candidates')
@@ -322,8 +376,25 @@ function! s:get_source_candidates(source) "{{{
       " Recaching.
       let funcname = 'change_candidates'
       let a:source.unite__cached_change_candidates =
-            \ a:source.change_candidates(
-            \     a:source.args, a:source.unite__context)
+            \ s:ignore_candidates(a:source.change_candidates(
+            \     a:source.args, a:source.unite__context),
+            \   ignore_pattern, context.path)
+    endif
+
+    if a:source.unite__context.is_async
+      " Get asynchronous candidates.
+      let funcname = 'async_gather_candidates'
+      while 1
+        let a:source.unite__cached_candidates +=
+              \ s:ignore_candidates(
+              \  a:source.async_gather_candidates(a:source.args, context),
+              \  ignore_pattern, context.path)
+
+        if (!context.sync && context.unite__is_interactive)
+              \ || !a:source.unite__context.is_async
+          break
+        endif
+      endwhile
     endif
   catch
     call unite#print_error(v:throwpoint)
@@ -338,6 +409,46 @@ function! s:get_source_candidates(source) "{{{
 
   return a:source.unite__cached_candidates
         \ + a:source.unite__cached_change_candidates
+endfunction"}}}
+
+function! s:ignore_candidates(candidates, pattern, path) "{{{
+  let candidates = copy(a:candidates)
+
+  if a:pattern != ''
+    let candidates = filter(candidates,
+        \ "get(v:val, 'action__path', v:val.word) !~# a:pattern")
+  endif
+
+  if a:path != ''
+    let candidates = unite#filters#{unite#util#has_lua()? 'lua' : 'vim'}
+          \_filter_head(candidates, a:path)
+  endif
+
+  return candidates
+endfunction"}}}
+
+function! unite#candidates#_group_post_filters(candidates) "{{{
+  " Post filters for group
+  let groups = {}
+  for i in range(0, len(a:candidates) - 1)
+    let group = a:candidates[i].group
+    if has_key(groups, group)
+      call add(groups[group].indexes, i)
+    else
+      let groups[group] = { 'index' : i, 'indexes' : [i] }
+    endif
+  endfor
+
+  let _ = []
+  for [group, val] in unite#util#sort_by(items(groups), 'v:val[1].index')
+    " Add group candidate
+    call add(_, {'word' : group, 'is_dummy' : 1})
+
+    " Add children candidates
+    let _ += map(val.indexes, 'a:candidates[v:val]')
+  endfor
+
+  return _
 endfunction"}}}
 
 let &cpo = s:save_cpo

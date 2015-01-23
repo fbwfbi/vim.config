@@ -1,7 +1,6 @@
 "=============================================================================
 " FILE: openable.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" Last Modified: 19 Jul 2013.
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -29,8 +28,6 @@ set cpo&vim
 
 " Variables  "{{{
 call unite#util#set_default('g:unite_kind_openable_persist_open_blink_time', '250m')
-call unite#util#set_default('g:unite_kind_openable_cd_command', 'cd')
-call unite#util#set_default('g:unite_kind_openable_lcd_command', 'lcd')
 "}}}
 function! unite#kinds#openable#define() "{{{
   return s:kind
@@ -39,6 +36,7 @@ endfunction"}}}
 let s:kind = {
       \ 'name' : 'openable',
       \ 'action_table': {},
+      \ 'parents' : [],
       \}
 
 " Actions "{{{
@@ -50,6 +48,23 @@ let s:kind.action_table.tabopen = {
 function! s:kind.action_table.tabopen.func(candidates) "{{{
   for candidate in a:candidates
     tabnew
+    call unite#take_action('open', candidate)
+  endfor
+endfunction"}}}
+
+let s:kind.action_table.choose = {
+      \ 'description' : 'choose windows and open items',
+      \ 'is_selectable' : 1,
+      \ }
+function! s:kind.action_table.choose.func(candidates) "{{{
+  for candidate in a:candidates
+    if winnr('$') != 1
+      let winnr = unite#helper#choose_window()
+      if winnr > 0 && winnr != winnr()
+        execute winnr.'wincmd w'
+      endif
+    endif
+
     call unite#take_action('open', candidate)
   endfor
 endfunction"}}}
@@ -72,6 +87,27 @@ function! s:kind.action_table.tabdrop.func(candidates) "{{{
     endif
   endfor
 endfunction"}}}
+
+let s:kind.action_table.switch = {
+      \ 'description' : 'switch files by ":sbuffer" command',
+      \ 'is_selectable' : 1,
+      \ }
+function! s:kind.action_table.switch.func(candidates) "{{{
+  let bufpath = unite#util#substitute_path_separator(expand('%:p'))
+
+  for candidate in a:candidates
+    if bufpath !=# candidate.action__path
+      let target = has_key(candidate, 'action__buffer_nr') ?
+            \ candidate.action__buffer_nr :
+            \ bufnr(unite#util#escape_file_searching(
+            \       candidate.action__path))
+
+      call unite#util#smart_execute_command('sbuffer', target)
+      call unite#remove_previewed_buffer_list(target)
+    endif
+  endfor
+endfunction"}}}
+
 
 let s:kind.action_table.split = {
       \ 'description' : 'horizontal split open items',
@@ -178,6 +214,21 @@ function! s:kind.action_table.persist_open.func(candidate) "{{{
   endif
 endfunction"}}}
 
+let s:kind.action_table.tabsplit = {
+      \ 'description' : 'tabopen and split items',
+      \ 'is_selectable' : 1,
+      \ 'is_tab' : 1,
+      \ }
+function! s:kind.action_table.tabsplit.func(candidates) "{{{
+  tabnew
+  silent call unite#take_action('open', a:candidates[0])
+  for candidate in a:candidates[1:]
+    silent call unite#take_action('vsplit', candidate)
+  endfor
+
+  " Resize all windows
+  wincmd =
+endfunction"}}}
 "}}}
 
 let &cpo = s:save_cpo

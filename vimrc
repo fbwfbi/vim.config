@@ -224,17 +224,17 @@ nmap <leader>e :WMToggle<CR>
 "command-t
 "nmap <F3> :CommandT<CR>
 
-" let g:ctrlp_map = '<F3>'
-" let g:ctrlp_open_multiple_files = 'v'
-" set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
-" set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
-" let g:ctrlp_custom_ignore = {
-"             \ 'dir':  '\v[\/]\.(git|hg|svn)$',
-"             \ 'file': '\v\.(exe|so|dll)$',
-"             \ 'link': '__some_bad_symbolic_links__'
-"             \ }
-" "most recently update
-" map <F4> :MRU<CR>
+let g:ctrlp_map = '<F3>'
+let g:ctrlp_open_multiple_files = 'v'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
+set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
+let g:ctrlp_custom_ignore = {
+            \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+            \ 'file': '\v\.(exe|so|dll)$',
+            \ 'link': '__some_bad_symbolic_links__'
+            \ }
+"most recently update
+map <F4> :MRU<CR>
 
 "{{ beautify
 " or{
@@ -289,11 +289,12 @@ fun SetupVAM()
     endif
     call vam#ActivateAddons(['vimcdoc', 'tlib',
                 \ 'vimproc', 'sudo',
-                \ 'Mark', 'vim-snipmate',  'vim-snippets','supertab',
-                \ 'unite', 'mru',
+                \ 'vim-snippets', 'snipmate', 'Supertab',
+                \ 'unite', 'mru', 'ctrlp',
                 \ 'tComment', 'surround', 'vim-less',
-                \ 'vim-autoformat', 'LeaderF', 'jedi-vim',
+                \ 'vim-autoformat', 'LeaderF',
                 \ 'TagHighlight', 'EasyColour', 'vim-jsbeautify'], {'auto_install' : 0})
+"'Mark', 'jedi-vim',
 endfun
 call SetupVAM()
 

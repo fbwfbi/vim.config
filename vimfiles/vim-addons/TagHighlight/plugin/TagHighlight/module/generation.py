@@ -132,7 +132,7 @@ def CreateTypesFile(options, language, unscoped_tags, file_tags):
                                     for ch in charactersToEscape:
                                         escapedKeyword = escapedKeyword.replace(ch, '\\' + ch)
                                     if options['IncludeSynMatches']:
-                                        matchEntries.add('syn match ' + thisType + ' ' + patChar + escapedKeyword + patChar)
+                                        matchEntries.add('syn match ' + thisType + ' ' + patChar + r'\<' + escapedKeyword + r'\>' + patChar)
                                     matchDone = True
                                     break
 
@@ -144,7 +144,7 @@ def CreateTypesFile(options, language, unscoped_tags, file_tags):
 
                 if keyword.lower() in vim_synkeyword_arguments:
                     if not options['SkipVimKeywords']:
-                        matchEntries.add('syn match ' + thisType + ' /' + keyword + '/')
+                        matchEntries.add('syn match ' + thisType + r' /\<' + keyword + r'\>/')
                     continue
 
                 temp = keycommand + " " + keyword
@@ -189,7 +189,7 @@ def CreateTypesFile(options, language, unscoped_tags, file_tags):
         # The resulting file will then work with any Vim (Windows, Linux, Cygwin etc)
         fh = open(filename, 'wb')
     except IOError:
-        Debug("ERROR: Couldn't create {file}\n".format(file=outfile), "Error")
+        Debug("ERROR: Couldn't create {file}\n".format(file=filename), "Error")
         sys.exit(1)
 
     try:
@@ -215,7 +215,7 @@ def CreateTypesFile(options, language, unscoped_tags, file_tags):
             if source_file is not None and not options['IgnoreFileScope']:
                 write(fh, 'endif\n')
     except IOError:
-        Debug("ERROR: Couldn't write {file} contents\n".format(file=outfile), "Error")
+        Debug("ERROR: Couldn't write {file} contents\n".format(file=filename), "Error")
         sys.exit(1)
     finally:
         fh.close()

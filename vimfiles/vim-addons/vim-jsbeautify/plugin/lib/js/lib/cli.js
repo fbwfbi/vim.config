@@ -32,13 +32,14 @@
 
 */
 
-var debug = process.env.DEBUG_JSBEAUTIFY || process.env.JSBEAUTIFY_DEBUG
-    ? function () { console.error.apply(console, arguments); }
-    : function () {};
+var debug = process.env.DEBUG_JSBEAUTIFY || process.env.JSBEAUTIFY_DEBUG ? function() {
+        console.error.apply(console, arguments);
+    } : function() {};
 
 var fs = require('fs'),
     cc = require('config-chain'),
     beautify = require('../index'),
+    mkdirp = require('mkdirp'),
     nopt = require('nopt'),
     path = require('path'),
     knownOpts = {
@@ -50,6 +51,7 @@ var fs = require('fs'),
         "preserve_newlines": Boolean,
         "max_preserve_newlines": Number,
         "space_in_paren": Boolean,
+        "space_in_empty_paren": Boolean,
         "jslint_happy": Boolean,
         // TODO: expand-strict is obsolete, now identical to expand.  Remove in future version
         "brace_style": ["collapse", "expand", "end-expand", "expand-strict"],
@@ -59,8 +61,9 @@ var fs = require('fs'),
         "wrap_line_length": Number,
         "e4x": Boolean,
         // HTML-only
-        "max_char": Number,
+        "max_char": Number, // obsolete since 1.3.5
         "unformatted": [String, Array],
+        "indent_inner_html": [Boolean],
         "indent_scripts": ["keep", "separate", "normal"],
         // CLI
         "version": Boolean,
@@ -83,6 +86,7 @@ var fs = require('fs'),
         "p": ["--preserve_newlines"],
         "m": ["--max_preserve_newlines"],
         "P": ["--space_in_paren"],
+        "E": ["--space_in_empty_paren"],
         "j": ["--jslint_happy"],
         "b": ["--brace_style"],
         "B": ["--break_chained_methods"],
@@ -91,8 +95,9 @@ var fs = require('fs'),
         "w": ["--wrap_line_length"],
         "X": ["--e4x"],
         // HTML-only
-        "W": ["--max_char"],
+        "W": ["--max_char"], // obsolete since 1.3.5
         "U": ["--unformatted"],
+        "I": ["--indent_inner_html"],
         "S": ["--indent_scripts"],
         // non-dasherized hybrid shortcuts
         "good-stuff": [
@@ -100,8 +105,8 @@ var fs = require('fs'),
             "--keep_function_indentation",
             "--jslint_happy"
         ],
-        "js"  : ["--type", "js"],
-        "css" : ["--type", "css"],
+        "js": ["--type", "js"],
+        "css": ["--type", "css"],
         "html": ["--type", "html"],
         // CLI
         "v": ["--version"],
@@ -113,15 +118,34 @@ var fs = require('fs'),
         // no shorthand for "config"
     });
 
+function verifyExists(fullPath) {
+    return fs.existsSync(fullPath) ? fullPath : null;
+}
+
+function findRecursive(dir, fileName) {
+    var fullPath = path.join(dir, fileName);
+    var nextDir = path.dirname(dir);
+    var result = verifyExists(fullPath);
+
+    if (!result && (nextDir !== dir)) {
+       result = findRecursive(nextDir, fileName);
+    }
+
+    return result;
+}
+
+function getUserHome() {
+    return process.env.HOME || process.env.USERPROFILE;
+}
+
 // var cli = require('js-beautify/cli'); cli.interpret();
-var interpret = exports.interpret = function (argv, slice) {
+var interpret = exports.interpret = function(argv, slice) {
     var parsed = nopt(knownOpts, shortHands, argv, slice);
 
     if (parsed.version) {
         console.log(require('../../package.json').version);
         process.exit(0);
-    }
-    else if (parsed.help) {
+    } else if (parsed.help) {
         usage();
         process.exit(0);
     }
@@ -130,8 +154,8 @@ var interpret = exports.interpret = function (argv, slice) {
         parsed,
         cleanOptions(cc.env('jsbeautify_'), knownOpts),
         parsed.config,
-        cc.find('.jsbeautifyrc'),
-        cc.find(path.join(process.env.HOME, ".jsbeautifyrc")),
+        findRecursive(process.cwd(), '.jsbeautifyrc'),
+        verifyExists(path.join(getUserHome() || "", ".jsbeautifyrc")),
         __dirname + '/../config/defaults.json'
     ).snapshot;
 
@@ -139,13 +163,13 @@ var interpret = exports.interpret = function (argv, slice) {
         // Verify arguments
         checkType(cfg);
         checkFiles(cfg);
-        checkIndent(cfg);
         debug(cfg);
 
         // Process files synchronously to avoid EMFILE error
-        cfg.files.forEach(processInputSync, { cfg: cfg });
-    }
-    catch (ex) {
+        cfg.files.forEach(processInputSync, {
+            cfg: cfg
+        });
+    } catch (ex) {
         debug(cfg);
         // usage(ex);
         console.error(ex);
@@ -180,27 +204,31 @@ function usage(err) {
     ];
 
     switch (scriptName.split('-').shift()) {
-    case "js":
-        msg.push('  -l, --indent-level            Initial indentation level [0]');
-        msg.push('  -t, --indent-with-tabs        Indent with tabs, overrides -s and -c');
-        msg.push('  -p, --preserve-newlines       Preserve line-breaks (--no-preserve-newlines disables)');
-        msg.push('  -m, --max-preserve-newlines   Number of line-breaks to be preserved in one chunk [10]');
-        msg.push('  -P, --space-in-paren          Add padding spaces within paren, ie. f( a, b )');
-        msg.push('  -j, --jslint-happy            Enable jslint-stricter mode');
-        msg.push('  -b, --brace-style             [collapse|expand|end-expand] ["collapse"]');
-        msg.push('  -B, --break-chained-methods   Break chained method calls across subsequent lines');
-        msg.push('  -k, --keep-array-indentation  Preserve array indentation');
-        msg.push('  -x, --unescape-strings        Decode printable characters encoded in xNN notation');
-        msg.push('  -w, --wrap-line-length        Wrap lines at next opportunity after N characters [0]');
-        msg.push('  -X, --e4x                     Pass E4X xml literals through untouched');
-        msg.push('  --good-stuff                  Warm the cockles of Crockford\'s heart');
-        break;
-    case "html":
-        msg.push('  -b, --brace-style             [collapse|expand|end-expand] ["collapse"]');
-        msg.push('  -S, --indent-scripts          [keep|separate|normal] ["normal"]');
-        msg.push('  -W, --max-char                Maximum characters per line (0 disables) [250]');
-        msg.push('  -U, --unformatted             List of tags (defaults to inline) that should not be reformatted');
-        break;
+        case "js":
+            msg.push('  -l, --indent-level            Initial indentation level [0]');
+            msg.push('  -t, --indent-with-tabs        Indent with tabs, overrides -s and -c');
+            msg.push('  -p, --preserve-newlines       Preserve line-breaks (--no-preserve-newlines disables)');
+            msg.push('  -m, --max-preserve-newlines   Number of line-breaks to be preserved in one chunk [10]');
+            msg.push('  -P, --space-in-paren          Add padding spaces within paren, ie. f( a, b )');
+            msg.push('  -E, --space-in-empty-paren    Add a single space inside empty paren, ie. f( )');
+            msg.push('  -j, --jslint-happy            Enable jslint-stricter mode');
+            msg.push('  -b, --brace-style             [collapse|expand|end-expand] ["collapse"]');
+            msg.push('  -B, --break-chained-methods   Break chained method calls across subsequent lines');
+            msg.push('  -k, --keep-array-indentation  Preserve array indentation');
+            msg.push('  -x, --unescape-strings        Decode printable characters encoded in xNN notation');
+            msg.push('  -w, --wrap-line-length        Wrap lines at next opportunity after N characters [0]');
+            msg.push('  -X, --e4x                     Pass E4X xml literals through untouched');
+            msg.push('  --good-stuff                  Warm the cockles of Crockford\'s heart');
+            break;
+        case "html":
+            msg.push('  -b, --brace-style             [collapse|expand|end-expand] ["collapse"]');
+            msg.push('  -I, --indent-inner-html       Indent body and head sections. Default is false.');
+            msg.push('  -S, --indent-scripts          [keep|separate|normal] ["normal"]');
+            msg.push('  -w, --wrap-line-length        Wrap lines at next opportunity after N characters [0]');
+            msg.push('  -p, --preserve-newlines       Preserve line-breaks (--no-preserve-newlines disables)');
+            msg.push('  -m, --max-preserve-newlines   Number of line-breaks to be preserved in one chunk [10]');
+            msg.push('  -U, --unformatted             List of tags (defaults to inline) that should not be reformatted');
+            break;
     }
 
     if (err) {
@@ -213,6 +241,7 @@ function usage(err) {
 }
 
 // main iterator, {cfg} passed as thisArg of forEach call
+
 function processInputSync(filepath) {
     var data = '',
         config = this.cfg,
@@ -229,15 +258,16 @@ function processInputSync(filepath) {
         input.resume();
         input.setEncoding('utf8');
 
-        input.on('data', function (chunk) {
+        input.on('data', function(chunk) {
             data += chunk;
         });
 
-        input.on('end', function () {
+        input.on('end', function() {
             makePretty(data, config, outfile, writePretty);
         });
-    }
-    else {
+    } else {
+        var dir = path.dirname(outfile);
+        mkdirp.sync(dir);
         data = fs.readFileSync(filepath, 'utf8');
         makePretty(data, config, outfile, writePretty);
     }
@@ -249,11 +279,12 @@ function makePretty(code, config, outfile, callback) {
         var pretty = beautify[fileType](code, config);
 
         // ensure newline at end of beautified output
-        pretty += '\n';
+        if (pretty && pretty.charAt(pretty.length - 1) !== '\n') {
+            pretty += '\n';
+        }
 
         callback(null, pretty, outfile, config);
-    }
-    catch (ex) {
+    } catch (ex) {
         callback(ex);
     }
 }
@@ -268,17 +299,16 @@ function writePretty(err, pretty, outfile, config) {
         try {
             fs.writeFileSync(outfile, pretty, 'utf8');
             logToStdout('beautified ' + path.relative(process.cwd(), outfile), config);
-        }
-        catch (ex) {
+        } catch (ex) {
             onOutputError(ex);
         }
-    }
-    else {
+    } else {
         process.stdout.write(pretty);
     }
 }
 
 // workaround the fact that nopt.clean doesn't return the object passed in :P
+
 function cleanOptions(data, types) {
     nopt.clean(data, types);
     return data;
@@ -286,26 +316,28 @@ function cleanOptions(data, types) {
 
 // error handler for output stream that swallows errors silently,
 // allowing the loop to continue over unwritable files.
+
 function onOutputError(err) {
     if (err.code === 'EACCES') {
         console.error(err.path + " is not writable. Skipping!");
-    }
-    else {
+    } else {
         console.error(err);
         process.exit(0);
     }
 }
 
 // turn "--foo_bar" into "foo-bar"
+
 function dasherizeFlag(str) {
     return str.replace(/^\-+/, '').replace(/_/g, '-');
 }
 
 // translate weird python underscored keys into dashed argv,
 // avoiding single character aliases.
+
 function dasherizeShorthands(hash) {
     // operate in-place
-    Object.keys(hash).forEach(function (key) {
+    Object.keys(hash).forEach(function(key) {
         // each key value is an array
         var val = hash[key][0];
         // only dasherize one-character shorthands
@@ -341,22 +373,12 @@ function checkType(parsed) {
     }
 }
 
-function checkIndent(parsed) {
-    if (parsed["indent_with_tabs"]) {
-        parsed["indent_size"] = 1;
-        parsed["indent_char"] = "\t";
-    }
-
-    return parsed;
-}
-
 function checkFiles(parsed) {
     var argv = parsed.argv;
 
     if (!parsed.files) {
         parsed.files = [];
-    }
-    else {
+    } else {
         if (argv.cooked.indexOf('-') > -1) {
             // strip stdin path eagerly added by nopt in '-f -' case
             parsed.files.some(removeDashedPath);
@@ -365,7 +387,7 @@ function checkFiles(parsed) {
 
     if (argv.remain.length) {
         // assume any remaining args are files
-        argv.remain.forEach(function (f) {
+        argv.remain.forEach(function(f) {
             parsed.files.push(path.resolve(f));
         });
     }
@@ -405,8 +427,7 @@ function testFilePath(filepath) {
         if (filepath !== "-") {
             fs.statSync(filepath);
         }
-    }
-    catch (err) {
+    } catch (err) {
         throw 'Unable to open path "' + filepath + '"';
     }
 }

@@ -1,1 +1,0 @@
-mark-2.8.0.vmb: call delete('/usr/share/vim/vimfiles/vim-addons/Mark%2666/autoload/mark.vim')|call delete('/usr/share/vim/vimfiles/vim-addons/Mark%2666/autoload/mark/palettes.vim')|call delete('/usr/share/vim/vimfiles/vim-addons/Mark%2666/plugin/mark.vim')|call delete('/usr/share/vim/vimfiles/vim-addons/Mark%2666/doc/mark.txt')

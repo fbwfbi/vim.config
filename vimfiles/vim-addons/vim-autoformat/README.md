@@ -40,6 +40,8 @@ Remember that when no formatprogram exists for a certain filetype, vim-autoforma
 This will fix at least the indentation of your code, according to vim's indentfile for that filetype.
 
 When you have installed the formatters you need, you can format the entire buffer with the command `:Autoformat`.
+You can provide the command with a file type such as `:Autoformat json`, otherwise the buffer's filetype will be used.
+
 For convenience it is recommended that you assign a key for this, like so:
 
 ```vim
@@ -63,11 +65,11 @@ Otherwise, download it here: http://astyle.sourceforge.net/.
 
 * `autopep8` for __Python__.
 It's probably in your distro's repository, so you can download it as a regular package.
-For Ubuntu type `sudo apt-get install autopep8` in a terminal.
+For Ubuntu type `sudo apt-get install python-autopep8` in a terminal.
 Here is the link to the repository: https://github.com/hhatto/autopep8.
 And here the link to its page on the python website: http://pypi.python.org/pypi/autopep8/0.5.2.
 
-* `js-beautify` for __Javascript__.
+* `js-beautify` for __Javascript__ and __JSON__.
 It can be installed by running `npm install -g js-beautify`.
 Note that `nodejs` is needed for this to work.
 Here is the link to the repository: https://github.com/einars/js-beautify.

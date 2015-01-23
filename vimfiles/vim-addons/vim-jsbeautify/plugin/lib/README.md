@@ -1,5 +1,5 @@
 # JS Beautifier
-[![Build Status](https://secure.travis-ci.org/einars/js-beautify.png?branch=master)](http://travis-ci.org/einars/js-beautify)
+[![Build Status](https://secure.travis-ci.org/beautify-web/js-beautify.png?branch=master)](http://travis-ci.org/beautify-web/js-beautify)
 [![NPM version](https://badge.fury.io/js/js-beautify.png)](http://badge.fury.io/js/js-beautify)
 
 This little beautifier will reformat and reindent bookmarklets, ugly
@@ -72,28 +72,30 @@ These are the command-line flags for both Python and JS scripts:
 
 ```text
 CLI Options:
-  -f, --file                    Input file(s) (Pass '-' for stdin). These can also be passed directly.
-  -r, --replace                 Write output in-place, replacing input
-  -o, --outfile                 Write output to file (default stdout)
-  --config                      Path to config file
-  --type                        [js|css|html] ["js"]
-  -q, --quiet                   Suppress logging to stdout
-  -v, --version                 Show the version
-  -h, --help                    Show this help
+  -f, --file       Input file(s) (Pass '-' for stdin)
+  -r, --replace    Write output in-place, replacing input
+  -o, --outfile    Write output to file (default stdout)
+  --config         Path to config file
+  --type           [js|css|html] ["js"]
+  -q, --quiet      Suppress logging to stdout
+  -h, --help       Show this help
+  -v, --version    Show the version
 
 Beautifier Options:
   -s, --indent-size             Indentation size [4]
   -c, --indent-char             Indentation character [" "]
   -l, --indent-level            Initial indentation level [0]
   -t, --indent-with-tabs        Indent with tabs, overrides -s and -c
-  -p, --preserve-newlines       Preserve existing line-breaks (--no-preserve-newlines disables)
-  -m, --max-preserve-newlines   Maximum number of line-breaks to be preserved in one chunk [10]
+  -p, --preserve-newlines       Preserve line-breaks (--no-preserve-newlines disables)
+  -m, --max-preserve-newlines   Number of line-breaks to be preserved in one chunk [10]
+  -P, --space-in-paren          Add padding spaces within paren, ie. f( a, b )
   -j, --jslint-happy            Enable jslint-stricter mode
   -b, --brace-style             [collapse|expand|end-expand] ["collapse"]
   -B, --break-chained-methods   Break chained method calls across subsequent lines
   -k, --keep-array-indentation  Preserve array indentation
   -x, --unescape-strings        Decode printable characters encoded in xNN notation
   -w, --wrap-line-length        Wrap lines at next opportunity after N characters [0]
+  -X, --e4x                     Pass E4X xml literals through untouched
   --good-stuff                  Warm the cockles of Crockford's heart
 ```
 
@@ -150,11 +152,14 @@ CSS Beautifier Options:
   -c, --indent-char             Indentation character [" "]
 
 HTML Beautifier Options:
+  -I, --indent-inner-html       Indent <head> and <body> sections. Default is false.
   -s, --indent-size             Indentation size [4]
   -c, --indent-char             Indentation character [" "]
   -b, --brace-style             [collapse|expand|end-expand] ["collapse"]
   -S, --indent-scripts          [keep|separate|normal] ["normal"]
-  -W, --max-char                Maximum characters per line (0 disables) [250]
+  -w, --wrap-line-length        Maximum characters per line (0 disables) [250]
+  -p, --preserve-newlines       Preserve existing line-breaks (--no-preserve-newlines disables)
+  -m, --max-preserve-newlines   Maximum number of line-breaks to be preserved in one chunk [10]
   -U, --unformatted             List of tags (defaults to inline) that should not be reformatted
 ```
 
@@ -173,3 +178,6 @@ useful or working for you but you must keep the copyright notice and license. (M
 Thanks also to Jason Diamond, Patrick Hof, Nochum Sossonko, Andreas Schneider, Dave
 Vasilevsky, Vital Batmanov, Ron Baldwin, Gabriel Harrison, Chris J. Shull,
 Mathias Bynens, Vittorio Gambaletta and others.
+
+js-beautify@1.5.1
+

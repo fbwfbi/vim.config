@@ -7,15 +7,15 @@ set guioptions-=b  "隐藏底部滚动条
 "set showtabline=0  "隐藏Tab栏
 
 if has("win32")
-    set guifont=Bitstream\ Vera\ Sans\ Mono:h14
+    set guifont=Bitstream\ Vera\ Sans\ Mono:h16
     "set guifont=Bitstream\ Vera\ Sans\:h14
 elseif has("gui_macvim")
-    set guifont=Droid\ Sans\ Mono:h15
+    set guifont=Droid\ Sans\ Mono:h16
     "set guifont=Monaco:h15
 else
     "set guifont=Bitstream\ Vera\ Sans\ Mono\ 14
-    set guifont=Droid\ Sans\ Mono\ 13
-    set guifontwide=Droid\ Sans\ 13
+    set guifont=Droid\ Sans\ Mono\ 16
+    set guifontwide=Droid\ Sans\ 16
 
 endif
 

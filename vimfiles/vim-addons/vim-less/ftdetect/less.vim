@@ -1,1 +1,1 @@
-autocmd BufNewFile,BufRead *.less setf less
+au BufRead,BufNewFile *.less	set filetype=less

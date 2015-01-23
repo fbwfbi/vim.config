@@ -1,7 +1,6 @@
 "=============================================================================
 " FILE: find.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
-" Last Modified: 29 Apr 2013.
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -26,6 +25,7 @@
 
 " Variables  "{{{
 call unite#util#set_default('g:unite_source_find_command', 'find')
+call unite#util#set_default('g:unite_source_find_default_opts', '')
 call unite#util#set_default('g:unite_source_find_max_candidates', 100)
 call unite#util#set_default('g:unite_source_find_ignore_pattern',
       \'\~$\|\.\%(bak\|sw[po]\)$\|'.
@@ -41,7 +41,7 @@ let s:action_find = {
   \ }
 function! s:action_find.func(candidate) "{{{
   call unite#start_script([['find',
-        \ a:candidate.action__directory]],
+        \ unit#helper#get_candidate_directory(a:candidate)]],
         \ {'no_quit' : 1})
 endfunction "}}}
 if executable(g:unite_source_find_command) && unite#util#has_vimproc()
@@ -58,10 +58,8 @@ let s:source = {
       \ 'name': 'find',
       \ 'max_candidates': g:unite_source_find_max_candidates,
       \ 'hooks' : {},
-      \ 'matchers' : 'matcher_regexp',
-      \ 'converters' : 'converter_relative',
+      \ 'matchers' : ['matcher_regexp'],
       \ 'ignore_pattern' : g:unite_source_find_ignore_pattern,
-      \ 'default_kind' : 'command',
       \ }
 
 function! s:source.hooks.on_init(args, context) "{{{
@@ -75,7 +73,7 @@ function! s:source.hooks.on_init(args, context) "{{{
     redraw
     echo "Please input command-line(quote is needed) Ex: -name '*.vim'"
     let a:context.source__input = unite#util#input(
-          \ printf('%s %s ', g:unite_source_find_command,
+          \ printf('%s %s %s ', g:unite_source_find_command, g:unite_source_find_default_opts,
           \   a:context.source__target), '-name ')
   endif
 endfunction"}}}
@@ -94,7 +92,7 @@ function! s:source.gather_candidates(args, context) "{{{
   endif
 
   if unite#util#is_windows() &&
-        \ vimproc#get_command_name('find') =~? '/Windows/system.*/find\.exe$'
+        \ vimproc#get_command_name(g:unite_source_find_command) =~? '/Windows/system.*/find\.exe$'
     call unite#print_source_message('Detected windows find command.', s:source.name)
     let a:context.is_async = 0
     return []
@@ -104,7 +102,7 @@ function! s:source.gather_candidates(args, context) "{{{
     let a:context.is_async = 1
   endif
 
-  let cmdline = printf('%s %s %s', g:unite_source_find_command,
+  let cmdline = printf('%s %s %s %s', g:unite_source_find_command, g:unite_source_find_default_opts,
     \   string(a:context.source__target), a:context.source__input)
   call unite#print_source_message('Command-line: ' . cmdline, s:source.name)
   let a:context.source__proc = vimproc#pgroup_open(
@@ -126,7 +124,7 @@ function! s:source.async_gather_candidates(args, context) "{{{
   endif
 
   let candidates = map(filter(
-        \ stdout.read_lines(-1, 100), "v:val !~ '^\\s*$'"),
+        \ stdout.read_lines(-1, 1000), "v:val !~ '^\\s*$'"),
         \ "fnamemodify(unite#util#iconv(v:val, 'char', &encoding), ':p')")
 
   if isdirectory(a:context.source__target)
@@ -138,7 +136,6 @@ function! s:source.async_gather_candidates(args, context) "{{{
     \   'word' : unite#util#substitute_path_separator(v:val),
     \   'kind' : (isdirectory(v:val) ? 'directory' : 'file'),
     \   'action__path' : unite#util#substitute_path_separator(v:val),
-    \   'action__directory' : unite#util#path2directory(v:val),
     \ }")
 
   if isdirectory(a:context.source__target)

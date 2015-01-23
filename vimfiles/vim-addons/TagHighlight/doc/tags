@@ -61,6 +61,7 @@ TagHL-SyntaxLanguageOverrides	TagHighlight.txt	/*TagHL-SyntaxLanguageOverrides*
 TagHL-TagFileDirModePriority	TagHighlight.txt	/*TagHL-TagFileDirModePriority*
 TagHL-TagFileDirectory	TagHighlight.txt	/*TagHL-TagFileDirectory*
 TagHL-TagFileName	TagHighlight.txt	/*TagHL-TagFileName*
+TagHL-TagRelative	TagHighlight.txt	/*TagHL-TagRelative*
 TagHL-TypesFileDirModePriority	TagHighlight.txt	/*TagHL-TypesFileDirModePriority*
 TagHL-TypesFileDirectory	TagHighlight.txt	/*TagHL-TypesFileDirectory*
 TagHL-TypesFileExtension	TagHighlight.txt	/*TagHL-TypesFileExtension*

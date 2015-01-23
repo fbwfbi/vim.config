@@ -1,10 +1,14 @@
+" Originally was
 " Vim indent file
-" Language:            LessCSS
-" Maintainer:        Leonard Ehrenfried <leonard.ehrenfried@web.de>
-" Last Change:        2011 Sep 26
+" Language:	SCSS
+" Maintainer:	Tim Pope <vimNOSPAM@tpope.org>
+" Last Change:	2010 Jul 26
+"=============================================
 
 if exists("b:did_indent")
   finish
 endif
 
 runtime! indent/css.vim
+
+" vim:set sw=2:

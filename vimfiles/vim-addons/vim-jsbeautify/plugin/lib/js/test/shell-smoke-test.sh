@@ -77,10 +77,47 @@ test_cli_js_beautify()
       exit 1
   }
 
+  rm -rf /tmp/js-beautify-mkdir
+  $CLI_SCRIPT -o /tmp/js-beautify-mkdir/js-beautify.js $SCRIPT_DIR/../bin/js-beautify.js && diff $SCRIPT_DIR/../bin/js-beautify.js /tmp/js-beautify-mkdir/js-beautify.js || {
+      echo "js-beautify output for $SCRIPT_DIR/../bin/js-beautify.js should have been created in /tmp/js-beautify-mkdir/js-beautify.js."
+      exit 1
+  }
+
   $CLI_SCRIPT $SCRIPT_DIR/../bin/css-beautify.js | diff -q $SCRIPT_DIR/../bin/css-beautify.js - && {
       echo "js-beautify output for $SCRIPT_DIR/../bin/css-beautify.js was expected to be different."
       exit 1
   }
+
+  export HOME=
+  export USERPROFILE=
+  $CLI_SCRIPT -o /tmp/js-beautify-mkdir/example1-default.js $SCRIPT_DIR/resources/example1.js
+
+  cd $SCRIPT_DIR/resources/indent11chars
+  $CLI_SCRIPT /tmp/js-beautify-mkdir/example1-default.js | diff -q /tmp/js-beautify-mkdir/example1-default.js - && {
+      echo "js-beautify output for /tmp/js-beautify-mkdir/example1-default.js was expected to be different based on CWD settings."
+      exit 1
+  }
+  cd $SCRIPT_DIR/resources/indent11chars/subDir1/subDir2
+  $CLI_SCRIPT /tmp/js-beautify-mkdir/example1-default.js | diff -q /tmp/js-beautify-mkdir/example1-default.js - && {
+      echo "js-beautify output for /tmp/js-beautify-mkdir/example1-default.js was expected to be different based on CWD parent folder settings."
+      exit 1
+  }
+  cd $SCRIPT_DIR
+
+
+  export HOME=$SCRIPT_DIR/resources/indent11chars
+  $CLI_SCRIPT /tmp/js-beautify-mkdir/example1-default.js | diff -q /tmp/js-beautify-mkdir/example1-default.js - && {
+      echo "js-beautify output for /tmp/js-beautify-mkdir/example1-default.js was expected to be different based on HOME settings."
+      exit 1
+  }
+
+  export HOME=
+  export USERPROFILE=$SCRIPT_DIR/resources/indent11chars
+  $CLI_SCRIPT /tmp/js-beautify-mkdir/example1-default.js | diff -q /tmp/js-beautify-mkdir/example1-default.js - && {
+      echo "js-beautify output for /tmp/js-beautify-mkdir/example1-default.js was expected to be different based on USERPROFILE settings."
+      exit 1
+  }
+
 
 }
 

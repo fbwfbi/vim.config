@@ -25,11 +25,14 @@ if !exists('g:tmp_file_Beautifier')
   let g:tmp_file_Beautifier = fnameescape(tempname())
 endif
 
-
+" Which file types supported vim plugin
+" Default settings for this file types you can see
+" in file plugin/.editorconfig
+let s:supportedFileTypes = ['js', 'css', 'html', 'jsx', 'json']
 
 "% Helper functions and variables
-let s:plugin_Root_direcoty = fnamemodify(expand("<sfile>"), ":h")
-let s:paths_Editorconfig = map(['~/.editorconfig', '~/.vim/.editorconfig', s:plugin_Root_direcoty.'/.editorconfig'], 'expand(v:val)')
+let s:plugin_Root_directory = fnamemodify(expand("<sfile>"), ":h")
+let s:paths_Editorconfig = map(['$HOME/.editorconfig', '$HOME/.vim/.editorconfig', s:plugin_Root_directory.'/.editorconfig'], 'expand(v:val)')
 
 " Function for debugging
 " @param {Any} content Any type which will be converted
@@ -61,7 +64,7 @@ endfun
 func! s:isAllowedType(type, ...)
   let haz = 1
   let type = a:type
-  let allowedTypes = get(a:000, 1, ['js', 'css', 'html'])
+  let allowedTypes = get(a:000, 1, s:supportedFileTypes)
 
   return index(allowedTypes, type) != -1
 endfun
@@ -73,6 +76,21 @@ func! s:quote(str)
   return '"'.escape(a:str,'"').'"'
 endfun
 
+" convert string to JSON
+" @param {String} str Any string
+" @return {String} The JSON string
+func! s:toJSON(str)
+  let json = substitute(a:str, "'[", '[', 'g')
+  let json = substitute(json, "]'", ']', 'g')
+
+  let json = substitute(json, "'false'", 'false', 'g')
+  let json = substitute(json, "'true'", 'true', 'g')
+
+  let json = substitute(json, "'", '"', 'g')
+  let json = s:quote(json)
+  return json
+endfun
+
 " @param {String} The content of .editorconfig file
 " @return {Dict} The configuration object based
 " on content the file.
@@ -80,17 +98,20 @@ func! s:processingEditconfigFile(content)
   let opts = {}
   let content = a:content
 
-  for type in ['js', 'css', 'html']
+  for type in s:supportedFileTypes
     " Get settings for javascript files
     " collect all data after [**.js] to
     " empty string
     let index = index(content, '[**.'.type.']')
+    let l:value = {}
 
     if index == -1
+      " If section doesn't define then set it how
+      " empty object
+      " @fix issue-25
+      let opts[type] = l:value
       continue
     endif
-
-    let l:value = {}
 
     " line with declaration [**.type]
     " we shoul skip.
@@ -175,7 +196,7 @@ function s:updateConfig(value)
 
   let config = deepcopy(a:value)
 
-  for type in ['js', 'css', 'html']
+  for type in s:supportedFileTypes
     if has_key(config, type)
       call s:treatConfig(config[type])
     endif
@@ -190,13 +211,11 @@ endfunction
 " Get default path
 " @param {String} type Some of the types js, html or css
 func s:getPathByType(type)
-  let path = ''
   let type = a:type
-  let rootPtah = s:plugin_Root_direcoty."/lib/js/lib/"
+  let rootPtah = s:plugin_Root_directory."/lib/js/lib/"
+  let path = rootPtah."beautify.js"
 
-  if type == 'js'
-    let path = rootPtah."beautify.js"
-  elseif type == 'html'
+  if type == 'html'
     let path = rootPtah."beautify-html.js"
   elseif type == 'css'
     let path = rootPtah."beautify-css.js"
@@ -236,7 +255,6 @@ endfunction
 
 "Converts number of non blank characters to cursor position (line and column)
 function! s:getCursorPosition(numberOfNonBlankCharactersFromTheStartOfFile)
-  "echo a:numberOfNonBlankCharactersFromTheStartOfFile
   let lineNumber = 1
   let nonBlankCount = 0
   while lineNumber <= line('$')
@@ -249,13 +267,15 @@ function! s:getCursorPosition(numberOfNonBlankCharactersFromTheStartOfFile)
       endif
       let charIndex = charIndex + 1
       if nonBlankCount == a:numberOfNonBlankCharactersFromTheStartOfFile 
-        "echo 'found position!'
+        "Found position!
         return {'line': lineNumber,'column': charIndex}
       end
     endwhile
     let lineNumber = lineNumber + 1
   endwhile
-  "echo "Oops, nothing found!"
+
+  "Oops, nothing found!
+  return {}
 endfunction
 
 
@@ -263,7 +283,10 @@ endfunction
 "Restoring current position by number of non blank characters
 function! s:setNumberOfNonSpaceCharactersBeforeCursor(mark,numberOfNonBlankCharactersFromTheStartOfFile)
   let location = s:getCursorPosition(a:numberOfNonBlankCharactersFromTheStartOfFile)
-  call setpos(a:mark, [0, location.line, location.column, 0])
+
+  if !empty(location)
+      call setpos(a:mark, [0, location.line, location.column, 0])
+  endif
 endfunction
 
 
@@ -352,15 +375,15 @@ func! Beautifier(...)
   let opts = b:config_Beautifier[type]
   let path = get(opts, 'path', s:getPathByType(type))
   let path = expand(path)
-
-if !has("win32")
-      let path = fnameescape(path)
-endif
-
+  let path = fnameescape(path)
   " Get external engine which will
   " be execute javascript file
-  " by default get node
-  let engine = get(opts, 'bin', 'node')
+  " by default get nodejs
+  let engine = get(opts, 'bin', 'nodejs')
+  " nodejs may be called node
+  if !executable(engine)
+      let engine = get(opts, 'bin', 'node')
+  endif
 
   " Get content from the files
   let content = getline(line1, line2)
@@ -369,26 +392,16 @@ endif
   let lines_length = len(getline(line1, line2))
 
   " Write content to temporary file
-  call writefile(content, g:tmp_file_Beautifier) 
+  call writefile(content, g:tmp_file_Beautifier)
   " String arguments which will be passed
   " to external command
 
-  " TODO make valid json
-  let opts_Beautifier_arg = substitute(string(opts), "'[", '[', 'g')
-  let opts_Beautifier_arg = substitute(opts_Beautifier_arg, "]'", ']', 'g')
-
-  let opts_Beautifier_arg = substitute(opts_Beautifier_arg, "'", '"', 'g')
-  let opts_Beautifier_arg = s:quote(opts_Beautifier_arg)
+  let opts_Beautifier_arg = s:toJSON(string(opts))
   let path_Beautifier_arg = s:quote(path)
   let tmp_file_Beautifier_arg = s:quote(g:tmp_file_Beautifier)
 
-
   if executable(engine)
-    if has("win32")
-        let result = system(engine." \"".s:plugin_Root_direcoty."/beautify.min.js"."\" --js_arguments ".tmp_file_Beautifier_arg." ".opts_Beautifier_arg." ".path_Beautifier_arg." ")
-    else
-        let result = system(engine." ".fnameescape(s:plugin_Root_direcoty."/beautify.min.js")." --js_arguments ".tmp_file_Beautifier_arg." ".opts_Beautifier_arg." ".path_Beautifier_arg)
-    endif
+    let result = system(engine." ".fnameescape(s:plugin_Root_directory."/beautify.min.js")." --js_arguments ".tmp_file_Beautifier_arg." ".opts_Beautifier_arg." ".path_Beautifier_arg)
   else
     " Executable bin doesn't exist
     call ErrorMsg('The '.engine.' is not executable!')
@@ -397,13 +410,14 @@ endif
 
   let lines_Beautify = split(result, "\n")
 
-  call setline(line1, lines_Beautify)
-
-  " delete excess lines
-  if lines_length > len(lines_Beautify)
-    let endline = len(lines_Beautify) + 1
-    silent exec endline.",$g/.*/d"
+  " issue 42
+  if !len(lines_Beautify)
+      return result
   endif
+
+  silent exec line1.",".line2."j"
+  call setline(line1, lines_Beautify[0])
+  call append(line1, lines_Beautify[1:])
 
   for [key,value] in items(cursorPositions)
     call s:setNumberOfNonSpaceCharactersBeforeCursor(key,value.characters)
@@ -438,11 +452,6 @@ func! BeautifierEditorconfigHook(config)
     return 1
   endif
 
-  if empty(get(b:config_Beautifier, type))
-    call WarningMsg('Type '.type.' is not presented in config')
-    return 1
-  endif
-
   let config = extend(b:config_Beautifier[type], config)
 
   call s:treatConfig(config)
@@ -455,12 +464,40 @@ endfun
 
 " @param {[Number|String]} a:0 Default value '1'
 " @param {[Number|String]} a:1 Default value '$'
+fun! RangeJsBeautify() range
+  return call('Beautifier', extend(['js'], [a:firstline, a:lastline]))
+endfun
+
 fun! JsBeautify(...)
   return call('Beautifier', extend(['js'], a:000))
 endfun
 
+fun! JsxBeautify(...)
+  return call('Beautifier', extend(['jsx'], a:000))
+endfun
+
+fun! RangeJsxBeautify() range
+  return call('Beautifier', extend(['jsx'], [a:firstline, a:lastline]))
+endfun
+
+fun! JsonBeautify(...)
+  return call('Beautifier', extend(['json'], a:000))
+endfun
+
+fun! RangeJsonBeautify() range
+  return call('Beautifier', extend(['json'], [a:firstline, a:lastline]))
+endfun
+
+fun! RangeHtmlBeautify() range
+  return call('Beautifier', extend(['html'], [a:firstline, a:lastline]))
+endfun
+
 fun! HtmlBeautify(...)
   return call('Beautifier', extend(['html'], a:000))
+endfun
+
+fun! RangeCSSBeautify() range
+  return call('Beautifier', extend(['css'], [a:firstline, a:lastline]))
 endfun
 
 fun! CSSBeautify(...)

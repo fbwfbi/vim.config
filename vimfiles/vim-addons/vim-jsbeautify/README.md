@@ -51,8 +51,25 @@ Simply add a line to your .vimrc.
   Bundle 'maksimr/vim-jsbeautify'
 
 ```
+
+You'd better add another line in your .vimrc to use js-beautify.
+
+```vim
+
+    Bundle 'einars/js-beautify'
+    
+```
+
+call BundleInstall()
+
+```vim
+
+    :BundleInstall
+
+```
+
 Also need to be installed after the expansion, go to its folder
-and perform `git submodule update - init - recursive` or specify
+and perform `git submodule update --init --recursive` or specify
 when you set up the path to the external file format (shown below).
 
 Setting
@@ -62,11 +79,13 @@ In version 1.0, all configuration is done through a file `.editorconfig`.
 This file can be located either in the root folder for the user `~ / .editorconfig `,
 or in a folder. vim `~ / .vim / .editorconfig `.
 
+To define custom path to .editorconfig file you should define variable `g:editorconfig_Beautifier`
+
 Settings are taken from sections [\*\*. js], [\*\*. css] and [\*\*. html]. within these
 sections can use a special comment `; vim:`, but this comment
 can be used only for the global settings.
 
-You can also configure a variable ```g: config_Beautifier```, but it is better to use. Editorconfig file.
+You can also configure a variable ```g: config_Beautifier```(g:config_Beautifier has type **dict**), but it is better to use. Editorconfig file.
 
 
 ### Examples
@@ -97,6 +116,7 @@ A simple example of .editorconfig file:
 .editorconfig file which use special comments (```;vim:```)
 and special properties for jsbeautify plugin like ```path```, ```bin```
 
+
 ```ini
   ; .editorconfig
 
@@ -105,14 +125,14 @@ and special properties for jsbeautify plugin like ```path```, ```bin```
   [**.js]
   ; Path to the external file format
   ; The default is taken from the lib folder inside the folder extension.
-  path=~/.vim/bundle/js-beautify/beautify.js
+  path=~/.vim/bundle/js-beautify/js/lib/beautify.js
   ; Javascript interpreter to be invoked by default 'node'
   bin=node
   indent_style = space
   indent_size = 4
 
   [**.css]
-  path=~/.vim/bundle/js-beautify/beautify-css.js
+  path=~/.vim/bundle/js-beautify/js/lib/beautify-css.js
   indent_style = space
   indent_size = 4
 
@@ -120,7 +140,7 @@ and special properties for jsbeautify plugin like ```path```, ```bin```
   ; Using special comments
   ; And such comments or apply only in global configuration
   ; So it's best to avoid them
-  ;vim:path=~/.vim/bundle/js-beautify/beautify-html.js
+  ;vim:path=~/.vim/bundle/js-beautify/js/lib/beautify-html.js
   ;vim:max_char=78:brace_style=expand
   indent_style = space
   indent_size = 4
@@ -144,7 +164,20 @@ Usage
 ```
 
 JsBeautify function takes two parameters, this number of start and end lines by
-default they are stet to 0 and '$'.
+default they are stet to 0 and `$`.
+
+If you want beautify only selected lines you should use functions
+**RangeJsBeautify**, **RangeCSSBeautify**, **RangeHtmlBeautify**.
+
+Example of binding function for js, html and css in visual mode on <ctrl-f>
+
+```vim
+  ".vimrc
+  autocmd FileType javascript vnoremap <buffer>  <c-f> :call RangeJsBeautify()<cr>
+  autocmd FileType html vnoremap <buffer> <c-f> :call RangeHtmlBeautify()<cr>
+  autocmd FileType css vnoremap <buffer> <c-f> :call RangeCSSBeautify()<cr>
+```
+
 
 ## Running tests
 Tests are written in [Urchin](http://www.urchin.sh) for vim files and build in [Grunt](https://github.com/gruntjs/grunt) test runer for javascript files.
@@ -159,11 +192,7 @@ Run vim tests with urchin.
 How run vim and javascript tests with [grunt](https://github.com/gruntjs/grunt).
 
     npm install -g grunt-cli
-    npm install grunt
-    npm install grunt-contrib-nodeunit
-    npm install grunt-contrib-jshint
-    npm install grunt-contrib-watch
-    npm install grunt-contrib-uglify
+    npm install
 
     grunt test
 
@@ -176,6 +205,7 @@ Thanks for assistance:
 
 + [@stonelee](https://github.com/stonelee)
 + [@peterfoldi](https://github.com/peterfoldi)
++ [@edmistond](https://github.com/edmistond)
 
 
 ## Versions

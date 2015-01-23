@@ -1,49 +1,56 @@
-# VIM-LESS
+vim-less
+========
 
-This vim bundle adds syntax highlighting, indenting and autocompletion for the dynamic stylesheet language [LESS](http://lesscss.org).
+![vim-less syntax highlighting](https://github.com/genoma/vim-less/raw/master/vim.png)
 
-This bundle is compatible with [vim-css-color](https://github.com/skammer/vim-css-color),
-[vim-css3-syntax](https://github.com/hail2u/vim-css3-syntax) and possibly other plugins that place code
-in `after/syntax/css.vim` or `after/syntax/css/*.vim`.
+Tim Pope [vim-haml](http://www.vim.org/scripts/script.php?script_id=1433) fork to highlight Less syntax correctly (mostly).
 
-![vim-less with vim-css-color and vim-css3-syntax (colorscheme solarized)](https://github.com/lenniboy/vim-less/raw/master/screenshot.png)
+This is a very rough modification of Tim syntax files to highlight Less syntax.
 
+# Installing
 
-## Installing and Using
+Using [Vundle](https://github.com/gmarik/vundle), add this to your `.vimrc` file:
 
-- Install [pathogen](http://www.vim.org/scripts/script.php?script_id=2332) into `~/.vim/autoload/` and add the
-   following line to your `~/.vimrc`:
+`Bundle 'genoma/vim-less'`
 
-        call pathogen#infect()
+Using [Pathogen](https://github.com/tpope/vim-pathogen) clone this repository in `'~/.vim/bundle'`:
 
-- Make a clone of the `vim-less` repository:
+`$ cd ~/.vim/bundle`
+`$ git clone https://github.com/genoma/vim-less.git`
 
-        $ mkdir -p ~/.vim/bundle
-        $ cd ~/.vim/bundle
-        $ git clone https://github.com/groenewege/vim-less
+# Dependencies
 
-- OR use [vundle](https://github.com/gmarik/vundle), adding this line to your `~/.vimrc`:
+You can enable support to CSS3 improved syntax highlighting installing [vim-css3-syntax](https://github.com/hail2u/vim-css3-syntax)
 
-        Bundle 'groenewege/vim-less'
+# Contributing
 
-- OR use git submodules:
+There are a bunch of issues right now that need attention:
 
-        $ git submodule add https://github.com/groenewege/vim-less.git bundle/vim-less
-        $ git submodule init
+- [x] ~~`@media` queries are identified as less variables~~
+- [x] ~~`div { font-size: 20px; }` written on one line, is identified as `cssDeprecated`~~ (fixed with a temporary workaround)
+- [x] ~~The code is in need of some cleaning~~
 
+If you find yourself having some free time on your hands and want to contribute, i strongly encurage you to do so.
 
-### Map
-.less to .css , lessc is required.
+# License
 
-    nnoremap <Leader>m :w <BAR> !lessc % > %:t:r.css<CR><space>
+The MIT License (MIT)
 
+Copyright (c) 2014 Alessandro Vioni
 
-## Credits
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
-Inspiration from [vim-haml](https://github.com/tpope/vim-haml),
-[scss-syntax.vim](https://github.com/cakebaker/scss-syntax.vim) and
-[vim-less](https://github.com/lunaru/vim-less)
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-## License ##
-
-MIT : [groenewege.mit-license.org](http://groenewege.mit-license.org/)
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

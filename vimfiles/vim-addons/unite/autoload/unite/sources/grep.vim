@@ -2,7 +2,6 @@
 " FILE: grep.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
 "          Tomohiro Nishimura <tomohiro68 at gmail.com>
-" Last Modified: 07 Oct 2013.
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -69,17 +68,21 @@ function! s:source.hooks.on_init(args, context) "{{{
   endif
 
   if type(get(a:args, 0, '')) == type([])
-    let a:context.source__target = a:args[0]
+    let args = a:args
+
+    let a:context.source__target = args[0]
     let targets = a:context.source__target
   else
-    let default = get(a:args, 0, '')
+    let args = unite#helper#parse_project_bang(a:args)
+
+    let default = get(args, 0, '')
 
     if default == ''
       let default = '.'
     endif
 
-    if type(get(a:args, 0, '')) == type('')
-          \ && get(a:args, 0, '') == ''
+    if type(get(args, 0, '')) == type('')
+          \ && get(args, 0, '') == ''
           \ && a:context.input == ''
       let target = unite#util#substitute_path_separator(
             \ unite#util#input('Target: ', default, 'file'))
@@ -107,9 +110,9 @@ function! s:source.hooks.on_init(args, context) "{{{
           \ 'substitute(v:val, "\\*\\+$", "", "")')
   endif
 
-  let a:context.source__extra_opts = get(a:args, 1, '')
+  let a:context.source__extra_opts = get(args, 1, '')
 
-  let a:context.source__input = get(a:args, 2, a:context.input)
+  let a:context.source__input = get(args, 2, a:context.input)
   if a:context.source__input == ''
     let a:context.source__input = unite#util#input('Pattern: ')
   endif
@@ -129,9 +132,9 @@ function! s:source.hooks.on_init(args, context) "{{{
     endif
 
     if get(vimfiler, 'source', '') ==# 'ssh'
-      let [hostname, port, path] =
+      let [hostname, port] =
             \ unite#sources#ssh#parse_path(
-            \  vimfiler.source.':'.vimfiler.current_dir)
+            \  vimfiler.source.':'.vimfiler.current_dir)[:1]
       let a:context.source__ssh_path =
             \ printf('%s://%s:%s/', vimfiler.source, hostname, port)
 
@@ -175,8 +178,7 @@ function! s:source.hooks.on_post_filter(args, context) "{{{
   for candidate in a:context.candidates
     let candidate.kind = [((a:context.source__ssh_path != '') ?
           \ 'file/ssh' : 'file'), 'jump_list']
-    let candidate.action__directory =
-          \ unite#util#path2directory(candidate.action__path)
+    let candidate.action__col_pattern = a:context.source__input
     let candidate.is_multiline = 1
   endfor
 endfunction"}}}
@@ -220,8 +222,8 @@ function! s:source.gather_candidates(args, context) "{{{
     \)
   if a:context.source__ssh_path != ''
     " Use ssh command.
-    let [hostname, port, path] =
-          \ unite#sources#ssh#parse_path(a:context.source__ssh_path)
+    let [hostname, port] =
+          \ unite#sources#ssh#parse_path(a:context.source__ssh_path)[:1]
     let cmdline = substitute(substitute(
           \ g:unite_kind_file_ssh_command . ' ' . cmdline,
           \   '\<HOSTNAME\>', hostname, 'g'), '\<PORT\>', port, 'g')
@@ -271,7 +273,7 @@ function! s:source.async_gather_candidates(args, context) "{{{
     call a:context.source__proc.waitpid()
   endif
 
-  let candidates = map(stdout.read_lines(-1, 100),
+  let candidates = map(stdout.read_lines(-1, 1000),
           \ "unite#util#iconv(v:val, g:unite_source_grep_encoding, &encoding)")
   if variables.default_opts =~ '^-[^-]*l'
         \ || a:context.source__extra_opts =~ '^-[^-]*l'
@@ -282,12 +284,6 @@ function! s:source.async_gather_candidates(args, context) "{{{
     let candidates = map(filter(candidates,
           \  'v:val =~ "^.\\+:.\\+$"'),
           \ '[v:val, split(v:val[2:], ":", 1)]')
-  endif
-
-  if a:context.source__ssh_path != ''
-    " Use ssh command.
-    let [hostname, port, path] = unite#sources#ssh#parse_path(
-          \     a:context.source__ssh_path)
   endif
 
   let _ = []

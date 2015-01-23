@@ -17,7 +17,7 @@ syn region  gypStringS          start=+'+  end=+'\|$+  contains=gypSection,gypTa
 syn match   gypNumber           "-\=\<\d\+L\=\>\|0[xX][0-9a-fA-F]\+\>"
 
 syn keyword gypSection          variables includes targets conditions target_defaults
-syn keyword gypTargetSection    actions all_dependent_settings configurations defines dependencies direct_dependent_settings include_dirs libraries link_settings sources target_conditions target_name type msvs_props xcode_config_file xcode_framework_dirs mac_bundle_resources xcode_settings
+syn keyword gypTargetSection    actions all_dependent_settings configurations defines dependencies direct_dependent_settings include_dirs library_dirs libraries link_settings sources target_conditions target_name type msvs_props xcode_config_file xcode_framework_dirs mac_bundle_resources xcode_settings default_configuration
 
 if exists("gyp_fold")
     syn match gypFunction "\<function\>"
